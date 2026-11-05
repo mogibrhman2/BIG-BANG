@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIG BANG Mini App</title>
+<script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#02120a;color:#fff;font-family:Arial;padding-bottom:95px}
+.top{padding:14px 15px;display:flex;justify-content:space-between;align-items:center}
+.top b{font-size:22px;color:#22ff88}
+.lvl-box{margin:0 15px;background:#0a2e1a;border:2px solid #22ff88;border-radius:18px;padding:13px}
+.lvl-top{display:flex;justify-content:space-between;font-weight:900}
+.lvl-top span{color:#22ff88}
+.lvl-bar{height:14px;background:#123322;border-radius:10px;margin-top:8px;overflow:hidden}
+.lvl-fill{height:100%;background:linear-gradient(90deg,#00e676,#a7ffcb);width:0%}
+.balance{background:linear-gradient(135deg,#00e676,#00b248);margin:12px 15px;border-radius:22px;padding:18px;text-align:center;color:#022c16}
+.balance h1{font-size:42px;word-break:break-all}
+.auto{background:#0a2e1a;border:2px solid #22ff88;margin:0 15px;border-radius:18px;padding:13px;text-align:center}
+.auto b{color:#22ff88}.auto p{color:#b9ffd6;font-size:13px}
+.coin{width:200px;height:200px;margin:12px auto;background:radial-gradient(circle at 35% 30%,#a7ffcb,#22ff88 45%,#00a651 75%,#00692e);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:90px;border:8px solid #d2ffe2;box-shadow:0 0 60px #22ff88;animation:pulse 2s infinite}
+@keyframes pulse{50%{transform:scale(1.05)}}
+.mining{text-align:center;color:#22ff88;font-weight:bold}
+.bar{height:12px;background:#123322;border-radius:10px;margin:10px 20px;overflow:hidden}
+.fill{height:100%;background:#22ff88;width:100%}
+.btn{background:#22ff88;color:#022c16;border:none;width:calc(100% - 30px);margin:8px 15px;padding:16px;border-radius:14px;font-size:17px;font-weight:900}
+.btn2{background:#0a2e1a;color:#22ff88;border:2px solid #22ff88}
+.btn:disabled{opacity:.5;background:#123322;color:#777}
+.card{background:#0a2e1a;border:1px solid #1e5a36;margin:12px 15px;padding:16px;border-radius:16px}
+.card b{color:#22ff88}.card p{font-size:14px;color:#ccc;margin-top:4px}
+.card input{width:100%;padding:13px;border-radius:10px;border:1px solid #22ff88;background:#02120a;color:#fff;margin-top:10px}
+.tag{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:900}
+.pending{background:#ffaa00;color:#000}.paid{background:#22ff88;color:#022c16}.rejected{background:#ff4444;color:#fff}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#02120a;border-top:2px solid #22ff88;display:flex;justify-content:space-around;padding:12px 0;font-size:13px}
+.nav div{text-align:center;color:#8affb8}.nav .on{color:#22ff88;font-weight:900}
+.hidden{display:none}
+.miner-row{display:flex;justify-content:space-between;align-items:center;background:#02120a;border:1px solid #1e5a36;border-radius:14px;padding:12px;margin-top:10px}
+.miner-row.next{border:2px solid #22ff88;background:#0a2e1a}
+.miner-row.done{opacity:.6}.miner-row.locked{opacity:.45}
+.mini-btn{background:#22ff88;color:#022c16;border:none;padding:10px 14px;border-radius:10px;font-weight:900;font-size:13px}
+.price-box{background:#02120a;border:1px dashed #22ff88;border-radius:12px;padding:10px;margin-top:8px;font-size:13px;line-height:1.8}
+.admin-card{background:#1a0a00;border:2px solid #ffaa00;border-radius:14px;padding:14px;margin-top:12px}
+.admin-card b{color:#ffaa00}
+.admin-card input{width:100%;padding:12px;border-radius:10px;border:1px solid #ffaa00;background:#02120a;color:#fff;margin-top:8px}
+.small-btn{padding:8px 12px;border-radius:8px;border:none;font-weight:900;font-size:12px;margin-right:6px;margin-top:8px}
+.ok{background:#22ff88;color:#022c16}.no{background:#ff4444;color:#fff}.copy{background:#333;color:#fff}
+.txid-box{background:#02120a;border:1px dashed #22ff88;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;word-break:break-all}
+.txid-box a{color:#22ff88;font-weight:900}
+.ref-clean{background:linear-gradient(135deg,#0a2e1a,#02120a);border:2px solid #22ff88;border-radius:16px;padding:16px;text-align:center}
+.ref-clean h2{color:#22ff88;font-size:24px}
+.ref-link{font-size:16px;font-weight:900;color:#fff;word-break:break-all;margin-top:10px;background:#02120a;padding:10px;border-radius:10px}
+#ton-connect{margin:0 15px}
+</style>
+</head>
+<body>
+
+<div id="p-mine">
+<div class="top"><b>💥 BIG BANG</b><div id="ton-connect"></div></div>
+<div class="lvl-box"><div class="lvl-top"><span>👑 LEVEL <span id="lvl">1</span> / 500</span><span id="lvlName">Beginner</span></div><div style="font-size:13px;margin-top:4px">ماین روزانه: <b id="perDayTop" style="color:#fff">500</b> BIG / روز<br>لول بعدی: <b id="nextInfo">580 BIG - 0.01 TON</b></div><div class="lvl-bar"><div class="lvl-fill" id="lvlBar"></div></div></div>
+<div class="balance"><p>💰 بیلانس شما</p><h1 id="bal">0.00</h1><small>BIG • 1 BIG = $0.0003 • ≈ <span id="usd">0.00</span> $ • <span id="inTon">0.00</span> TON</small></div>
+<div class="auto"><b>⚡ ماین خودکار فعال</b><p>روزانه: <b id="perDayTxt" style="color:#fff">500</b> BIG • <span id="perSec">0.0058</span> / ثانیه<br>امروز: <b id="todayMined" style="color:#fff">0</b> BIG</p></div>
+<div class="coin">💥</div><div class="mining">● در حال ماین خودکار...</div>
+<div style="text-align:center">⚡ انرژی: <span id="energy">1000</span>/1000</div>
+<div class="bar"><div class="fill" id="energyBar"></div></div>
+<button class="btn" onclick="claim()">🎁 CLAIM - +50 BIG</button>
+<button class="btn btn2" onclick="go('miners')">🚀 خرید لول بعدی - فقط 0.01 TON</button>
+<div class="card"><b>📊 آمار</b><p>لول: <span id="lvl2">1</span>/500 | سرعت: <span id="speed">0.0058</span><br>رفرال: <span id="refCount2">0</span> | سود رفرال: <span id="refEarn2">0</span></p><div class="price-box">💰 1 BIG = $0.0003<br>💎 1 TON = $1.16<br>🔄 1 TON = 3866 BIG</div></div>
+</div>
+
+<div id="p-miners" class="hidden">
+<div class="top"><b>💎 ماینر ها</b></div>
+<div class="card" style="border:2px solid #ffaa00"><b style="color:#ffaa00">⚠️ قیمت بر اساس قیمت سکه</b><p>1 BIG = $0.0003 • 1 TON = $1.16<br>لول 2 = 0.01 TON، لول 3 = 0.02 TON، هر لول +0.01 TON</p></div>
+<div class="card"><b>👑 لول فعلی تو: <span id="lvl3">1</span> / 500</b><p>روزانه: <b id="perDayCard">500</b> BIG</p><p id="nextCard">لول بعدی: 2 = 580 BIG / روز</p><div class="price-box" id="nextPriceBox">قیمت: 0.01 TON</div><button class="btn" id="buyNextBtn" onclick="buyNextLevel()">💎 خرید لول بعدی با TON</button></div>
+<div class="card"><b>📋 لیست لول ها:</b><div id="minerList"></div></div>
+</div>
+
+<div id="p-referral" class="hidden">
+<div class="top"><b>👥 رفرال - 10% سود</b></div>
+<div class="card">
+<b>🔗 لینک دعوت تو:</b>
+<div class="ref-clean" style="margin-top:10px">
+<h2>💥 BIG BANG Mini App</h2>
+<div class="ref-link" id="refLinkShow">https://BIG-BANGMini Appref=776423862</div>
+<p style="font-size:12px;color:#8affb8;margin-top:8px">با این لینک بیا، 10% سود میگیری</p>
+</div>
+<button class="btn" onclick="copyRef()">📋 کاپی لینک دعوت</button>
+<button class="btn btn2" onclick="shareRef()">📤 اشتراک گذاری</button>
+</div>
+<div class="card"><b>📊 آمار رفرال</b><p>تعداد: <b id="refCount" style="color:#fff">0</b><br>درآمد رفرال ها: <b id="refTotal" style="color:#fff">0</b> BIG<br>سود تو (10%): <b id="refEarn" style="color:#22ff88">0</b> BIG</p><button class="btn btn2" onclick="simulateRef()">+ تست: یک دوست دعوت کن</button></div>
+</div>
+
+<div id="p-withdraw" class="hidden">
+<div class="top"><b>💸 برداشت</b></div>
+<div class="card"><b>قابل برداشت: <span id="bal3">0</span> BIG</b><p>حداقل: 1000 BIG = $0.30 = 0.26 TON<br>1 BIG = $0.0003</p><input id="tonAddr" placeholder="آدرس TON خودت - UQ..."><input id="wAmount" type="number" placeholder="مقدار BIG..."><button class="btn" onclick="withdraw()">💸 درخواست برداشت</button></div>
+<div class="card"><b>📜 تاریخچه من</b><div id="history"></div><button class="btn btn2" onclick="clearMyOldHistory()" style="width:100%;margin:8px 0 0 0;font-size:13px">🗑️ پاک کردن تاریخچه قدیم</button></div>
+</div>
+
+<div id="p-profile" class="hidden">
+<div class="top"><b>👤 پروفایل</b></div>
+<div class="card"><b>🔗 کیف پول</b><p id="walletInfo">وصل نشده</p><p style="font-size:12px">آی‌دی تو: <span id="myIdTxt"></span> • آیدی عددی: <span id="myNumericId2"></span></p></div>
+<div class="card"><b>📊 خلاصه</b><p>لول: <span id="lvl4">1</span>/500 • روزانه: <span id="perDayProfile">500</span><br>بیلانس: <span id="bal2">0</span> BIG = <span id="balUsd2">0</span> $<br>ماین امروز: <span id="today2">0</span><br>رفرال: <span id="refCount3">0</span> | سود: <span id="refEarn3">0</span></p></div>
+<div id="adminBtnBox" class="card hidden" style="border:2px solid #ffaa00"><b style="color:#ffaa00">👑 تو ادمین هستی!</b><button class="btn" onclick="go('admin')">👑 باز کردن پنل ادمین</button></div>
+</div>
+
+<div id="p-admin" class="hidden">
+<div class="top"><b>👑 پنل ادمین - فقط تو</b></div>
+<div class="card"><b>📊 خلاصه</b><p>کل: <span id="adminTotal">0</span> | در انتظار: <span id="adminPending">0</span> | پرداخت شده: <span id="adminPaid">0</span></p><button class="btn btn2" onclick="refreshAdmin()">🔄 تازه کردن</button><button class="btn btn2" onclick="copyAllPending()">📋 کاپی همه در انتظار</button></div>
+<div class="card"><b>💸 همه درخواست های برداشت:</b><div id="adminList"></div></div>
+</div>
+
+<div class="nav">
+<div class="on" onclick="go('mine',this)">⛏️<br>Mine</div>
+<div onclick="go('miners',this)">💎<br>Miners</div>
+<div onclick="go('referral',this)">👥<br>Referral</div>
+<div onclick="go('withdraw',this)">💸<br>Withdraw</div>
+<div onclick="go('profile',this)">👤<br>Profile</div>
+<div id="adminNav" class="hidden" onclick="go('admin',this)">👑<br>Admin</div>
+</div>
+
+<script>
+const BIG_PRICE_USD = 0.0003;
+const TON_PRICE_USD = 1.16;
+const OWNER_WALLET = "UQBbx-mJoYStt1XwkZ5NdVTOYrrqLo65bmrpuO9JRKhem8zV";
+const ADMIN_TELEGRAM_ID = "776423862";
+const BOT_TOKEN = "";
+const APP_NAME = "BIG BANG Mini App";
+
+let myId = localStorage.getItem('big_id') || ('BIG'+Math.floor(100000+Math.random()*900000));
+localStorage.setItem('big_id', myId);
+let myNumericId = myId.replace('BIG','');
+try{ if(window.Telegram && Telegram.WebApp && Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user && Telegram.WebApp.initDataUnsafe.user.id){ myNumericId = String(Telegram.WebApp.initDataUnsafe.user.id); } }catch(e){}
+// ✅ لینک عمومی نهایی - بدون / و بدون ?
+function getRefLink(){ return 'https://BIG-BANGMini Appref='+myNumericId; }
+// لینک واقعی برای کار کردن - پشت دکمه کاپی
+function getRealLink(){ return 'https://mogibrhman2.github.io/BIG-BANG/?ref='+myId; }
+
+let bal = parseFloat(localStorage.getItem('big_bal')||'0');
+if(!isFinite(bal) || bal > 100000000){ bal = 0; localStorage.setItem('big_bal','0'); }
+let lvl = parseInt(localStorage.getItem('big_lvl')||'1');
+if(!isFinite(lvl) || lvl<1 || lvl>500) lvl=1;
+let todayMined = parseFloat(localStorage.getItem('big_today')||'0');
+if(!isFinite(todayMined) || todayMined>1000000) todayMined=0;
+let lastDate = localStorage.getItem('big_date')
