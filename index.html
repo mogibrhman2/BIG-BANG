@@ -59,9 +59,9 @@ body{background:#02120a;color:#fff;font-family:Arial;padding-bottom:95px}
 <div class="balance"><p>💰 بیلانس شما</p><h1 id="bal">0.00</h1><small>BIG • 1 BIG = $0.0003 • ≈ <span id="usd">0.00</span> $ • <span id="inTon">0.00</span> TON</small></div>
 <div class="auto"><b>⚡ ماین خودکار فعال</b><p>روزانه: <b id="perDayTxt" style="color:#fff">500</b> BIG • <span id="perSec">0.0058</span> / ثانیه<br>امروز: <b id="todayMined" style="color:#fff">0</b> BIG</p></div>
 <div class="coin">💥</div><div class="mining">● در حال ماین خودکار...</div>
-<div style="text-align:center">⚡ انرژی: <span id="energy">1000</span>/1000</div>
+
 <div class="bar"><div class="fill" id="energyBar"></div></div>
-<button class="btn" onclick="claim()">🎁 CLAIM - +50 BIG</button>
+
 <button class="btn btn2" onclick="go('miners')">🚀 خرید لول بعدی - فقط 0.01 TON</button>
 <div class="card"><b>📊 آمار</b><p>لول: <span id="lvl2">1</span>/500 | سرعت: <span id="speed">0.0058</span><br>رفرال: <span id="refCount2">0</span> | سود رفرال: <span id="refEarn2">0</span></p><div class="price-box">💰 1 BIG = $0.0003<br>💎 1 TON = $1.16<br>🔄 1 TON = 3866 BIG</div></div>
 </div>
@@ -76,12 +76,12 @@ body{background:#02120a;color:#fff;font-family:Arial;padding-bottom:95px}
 <div id="p-referral" class="hidden">
 <div class="top"><b>👥 رفرال - 10% سود</b></div>
 <div class="card"><b>🔗 لینک دعوت:</b><p id="refLink" style="background:#02120a;padding:10px;border-radius:10px;word-break:break-all;color:#22ff88">...</p><button class="btn" onclick="copyRef()">📋 کاپی لینک</button><button class="btn btn2" onclick="shareRef()">📤 اشتراک گذاری</button></div>
-<div class="card"><b>📊 آمار رفرال</b><p>تعداد: <b id="refCount" style="color:#fff">0</b><br>درآمد رفرال ها: <b id="refTotal" style="color:#fff">0</b> BIG<br>سود تو (10%): <b id="refEarn" style="color:#22ff88">0</b> BIG</p><button class="btn btn2" onclick="simulateRef()">+ تست: یک دوست دعوت کن</button></div>
+<div class="card"><b>📊 آمار رفرال</b><p>تعداد: <b id="refCount" style="color:#fff">0</b><br>درآمد رفرال ها: <b id="refTotal" style="color:#fff">0</b> BIG<br>سود تو (10%): <b id="ref" style="color:#22ff88">0</b> ID</p><button class="btn btn2" onclick="simulateRef()">+ تست: یک دوست دعوت کن</button></div>
 </div>
 
 <div id="p-withdraw" class="hidden">
 <div class="top"><b>💸 برداشت</b></div>
-<div class="card"><b>قابل برداشت: <span id="bal3">0</span> BIG</b><p>حداقل: 1000 BIG = $0.30 = 0.26 TON<br>1 BIG = $0.0003 • پول به آدرس TON تو میره</p><input id="tonAddr" placeholder="آدرس TON خودت - UQ..."><input id="wAmount" type="number" placeholder="مقدار BIG..."><button class="btn" onclick="withdraw()">💸 درخواست برداشت</button><p style="font-size:12px;margin-top:8px">بعد از پرداخت، ادمین آیدی تراکنش را میزنه تا تو بتونی در Tonviewer ببینیش.</p></div>
+<div class="card"><b>قابل برداشت: <span id="bal3">0</span> BIG</b><p>حداقل: 100 BIG = $0.30 = 0.26 TON<br>1 BIG = $0.0003 • پول به آدرس TON تو میره</p><input id="tonAddr" placeholder="آدرس TON خودت - UQ..."><input id="wAmount" type="number" placeholder="مقدار BIG..."><button class="btn" onclick="withdraw()">💸 درخواست برداشت</button><p style="font-size:12px;margin-top:8px">بعد از پرداخت، ادمین آیدی تراکنش را میزنه تا تو بتونی در Tonviewer ببینیش.</p></div>
 <div class="card"><b>📜 تاریخچه من</b><div id="history"></div><button class="btn btn2" onclick="clearMyOldHistory()" style="width:100%;margin:8px 0 0 0;font-size:13px">🗑️ پاک کردن تاریخچه قدیم خراب</button></div>
 </div>
 
@@ -100,16 +100,16 @@ body{background:#02120a;color:#fff;font-family:Arial;padding-bottom:95px}
 
 <div class="nav">
 <div class="on" onclick="go('mine',this)">⛏️<br>Mine</div>
-<div onclick="go('miners',this)">💎<br>Miners</div>
-<div onclick="go('referral',this)">👥<br>Referral</div>
-<div onclick="go('withdraw',this)">💸<br>Withdraw</div>
-<div onclick="go('profile',this)">👤<br>Profile</div>
+<div onclick="go('Miners',this)">💎<br>Miners</div>
+<div onclick="go('Referral',this)">👥<br>Referral</div>
+<div onclick="go('Withdraw',this)">💸<br>Withdraw</div>
+<div onclick="go('Profile',this)">👤<br>Profile</div>
 <div id="adminNav" class="hidden" onclick="go('admin',this)">👑<br>Admin</div>
 </div>
 
 <script>
 const BIG_PRICE_USD = 0.0003;
-const TON_PRICE_USD = 1.16;
+const TON_PRICE_USD = 1.12;
 const OWNER_WALLET = "UQBbx-mJoYStt1XwkZ5NdVTOYrrqLo65bmrpuO9JRKhem8zV";
 const ADMIN_TELEGRAM_ID = "776423862";
 const BOT_TOKEN = ""; // ⚠️ توکن بات خودت را اینجا بگذار
