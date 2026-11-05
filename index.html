@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BIG BANG</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
+body{background:#0a0a1a;color:white;text-align:center;padding:15px;padding-bottom:90px}
+.header{font-size:28px;font-weight:900;color:#ffd700;margin:10px}
+.balance-box{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;padding:20px;border-radius:20px;margin:15px 0}
+.balance-box h2{font-size:14px}
+.balance-box h1{font-size:42px}
+.coin{width:180px;height:180px;background:radial-gradient(circle,#ffe55c,#ffaa00);border-radius:50%;margin:20px auto;display:flex;align-items:center;justify-content:center;font-size:80px;cursor:pointer;border:8px solid #fff3b0;box-shadow:0 0 30px #ffd700;user-select:none}
+.coin:active{transform:scale(0.92)}
+.energy{background:#222;padding:10px;border-radius:10px;margin:10px 0}
+.btn{background:#ffd700;color:#000;border:none;padding:12px 20px;border-radius:12px;font-weight:900;width:100%;margin:5px 0;cursor:pointer;font-size:16px}
+.card{background:#1a1a2e;padding:15px;border-radius:15px;margin:10px 0;text-align:left}
+.tabs{position:fixed;bottom:0;left:0;right:0;background:#111;display:flex;padding:10px 0}
+.tab{flex:1;cursor:pointer;font-size:13px;color:#888}
+.tab.active{color:#ffd700;font-weight:900}
+.page{display:none}.page.active{display:block}
+</style>
+</head>
+<body>
+<div class="header">💥 BIG BANG 💥</div>
+
+<div id="page-mine" class="page active">
+<div class="balance-box"><h2>Your Balance</h2><h1 id="bal">0</h1><p>BIG</p></div>
+<div class="coin" onclick="mine()">💥</div>
+<p>Tap to Mine!</p>
+<div class="energy">⚡ Energy: <span id="energy">1000</span> / 1000</div>
+<button class="btn" onclick="claim()">🎁 Claim Daily Reward +100</button>
+</div>
+
+<div id="page-tasks" class="page">
+<h2>📋 Tasks</h2>
+<div class="card">✅ Join Telegram Channel <button class="btn" onclick="doTask(this,50)">+50 BIG</button></div>
+<div class="card">✅ Follow on X <button class="btn" onclick="doTask(this,50)">+50 BIG</button></div>
+<div class="card">✅ Invite 3 Friends <button class="btn" onclick="doTask(this,100)">+100 BIG</button></div>
+</div>
+
+<div id="page-miners" class="page">
+<h2>⛏️ Miners</h2>
+<div class="card">🥉 Bronze Miner - 100 BIG <button class="btn" onclick="buyMiner(100)">Buy</button></div>
+<div class="card">🥈 Silver Miner - 500 BIG <button class="btn" onclick="buyMiner(500)">Buy</button></div>
+<div class="card">🥇 Gold Miner - 2000 BIG <button class="btn" onclick="buyMiner(2000)">Buy</button></div>
+<p>Your Miners: <span id="miners">0</span></p>
+</div>
+
+<div id="page-friends" class="page">
+<h2>👥 Friends</h2>
+<div class="card">Invite friends and earn 10% of their mining!</div>
+<button class="btn" onclick="invite()">📤 Invite Friend</button>
+<p id="inviteLink" style="margin-top:10px;word-break:break-all"></p>
+</div>
+
+<div id="page-profile" class="page">
+<h2>👤 Profile</h2>
+<div class="card">Name: <span id="username">Player</span><br>Balance: <span id="bal2">0</span> BIG<br>Miners: <span id="miners2">0</span></div>
+</div>
+
+<div class="tabs">
+<div class="tab active" onclick="showPage('mine',this)">⛏️ Mine</div>
+<div class="tab" onclick="showPage('tasks',this)">📋 Tasks</div>
+<div class="tab" onclick="showPage('miners',this)">💎 Miners</div>
+<div class="tab" onclick="showPage('friends',this)">👥 Friends</div>
+<div class="tab" onclick="showPage('profile',this)">👤 Profile</div>
+</div>
+
+<script>
+let bal = parseInt(localStorage.getItem('big_bal')||'0');
+let energy = parseInt(localStorage.getItem('big_energy')||'1000');
+let miners = parseInt(localStorage.getItem('big_miners')||'0');
+function update(){
+document.getElementById('bal').innerText=bal;
+document.getElementById('bal2').innerText=bal;
+document.getElementById('energy').innerText=energy;
+document.getElementById('miners').innerText=miners;
+document.getElementById('miners2').innerText=miners;
+localStorage.setItem('big_bal',bal);
+localStorage.setItem('big_energy',energy);
+localStorage.setItem('big_miners',miners);
+}
+function mine(){
+if(energy<=0){alert('No energy! Wait...');return}
+energy--; bal+=1+miners; update();
+}
+function claim(){bal+=100; update(); alert('You got +100 BIG!');}
+function doTask(btn,amt){bal+=amt; update(); btn.innerText='Done ✅'; btn.disabled=true;}
+function buyMiner(cost){
+if(bal>=cost){bal-=cost; miners++; update(); alert('Miner Bought!');}
+else alert('Not enough BIG!');
+}
+function showPage(p,el){
+document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+document.getElementById('page-'+p).classList.add('active');
+document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+el.classList.add('active');
+}
+function invite(){
+let link='https://t.me/BigBang_Bot?start='+Math.floor(Math.random()*100000);
+document.getElementById('inviteLink').innerText=link;
+alert('Link Copied! Share it!');
+}
+try{let tg=window.Telegram.WebApp; tg.expand(); document.getElementById('username').innerText=tg.initDataUnsafe?.user?.first_name||'Player';}catch(e){}
+update();
+setInterval(()=>{if(energy<1000){energy++; update();}},3000);
+</script>
+</body>
+  </html>
