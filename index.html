@@ -198,7 +198,7 @@ function levelCostTON(l){if(l<=1||!REAL_RATE||REAL_RATE<=0)return 0;return level
 function upgradeCostTON(target){if(target<=lvl)return 0;return levelCostTON(target);}
 function upgradeCostBIG(target){if(target<=lvl)return 0;return levelCostBIG(target);}
 // FIX LEVEL AUTO: level = hold, never stuck
-function getTotalForLevel(){var h=0;try{h=Math.round(getHolding())||0}catch(e){h=0}var b=0;try{b=Math.round(typeof bal!=='undefined'?bal:0)||0}catch(e){b=0}return h+b;}
+function getTotalForLevel(){var b=0;try{b=Math.round(typeof bal!=='undefined'?bal:0)||0}catch(e){b=0}var connected=false;try{connected=!!(typeof wallet!=='undefined'&&wallet)}catch(e){}if(!connected)return b;var h=0;try{h=Math.round(getHolding())||0}catch(e){h=0}return h+b;}
 function syncLevelFromHold(){var total=getTotalForLevel();var hl=getHoldLevel(total);if(hl!==lvl){lvl=hl;try{save()}catch(e){}try{update(false)}catch(e){}try{renderMiners()}catch(e){}}}
 function showMarketTab(m){if(m==='history'){marketMode='history';document.getElementById('tabBuy').className='';document.getElementById('tabSell').className='';document.getElementById('tabHist').className='on';document.getElementById('swapBox').className='swap-box hidden';document.getElementById('marketHistoryPanel').className='hist-box';showMarketHistory();return}marketMode=m;document.getElementById('tabBuy').className=m==='buy'?'on':'';document.getElementById('tabSell').className=m==='sell'?'on':'';document.getElementById('tabHist').className='';document.getElementById('swapBox').className='swap-box';document.getElementById('marketHistoryPanel').className='hist-box hidden';setMarketMode(m)}
 function setMarketMode(m){if(m==='history'){showMarketTab('history');return}marketMode=m;var pu=document.getElementById('payUnit');if(pu)pu.innerText=m==='buy'?'TON':'BIG';var ru=document.getElementById('receiveUnit');if(ru)ru.innerText=m==='buy'?'BIG':'TON';var rb=document.getElementById('reviewBtn');if(rb)rb.innerText=m==='buy'?T('reviewBuy'):T('reviewSell');calcSwap()}
@@ -382,8 +382,8 @@ async function initWallet(){
     let tries=0;while(!window.TON_CONNECT_UI && tries<20){await new Promise(r=>setTimeout(r,200));tries++;}
     if(!window.TON_CONNECT_UI)return;
     tonConnectUI=new TON_CONNECT_UI.TonConnectUI({manifestUrl:'https://mogibrhman2.github.io/BIG-BANG/tonconnect-manifest.json',buttonRootId:'ton-connect'});
-    tonConnectUI.onStatusChange(function(w){if(w && w.account && w.account.address){wallet=w.account.address;fillWalletUI();}else{clearWallet(false);}});
-    try{let cur=tonConnectUI.wallet;if(cur && cur.account && cur.account.address){wallet=cur.account.address;fillWalletUI();}}catch(e){}
+    tonConnectUI.onStatusChange(function(w){if(w && w.account && w.account.address){wallet=w.account.address;fillWalletUI();try{syncLevelFromHold()}catch(e){}}else{clearWallet(false);try{syncLevelFromHold()}catch(e){}}});
+      try{let cur=tonConnectUI.wallet;if(cur && cur.account && cur.account.address){wallet=cur.account.address;fillWalletUI();try{syncLevelFromHold()}catch(e){}}}catch(e){}
   }catch(e){console.log("wallet init fail",e);}
 }
 function openWalletModal(){if(tonConnectUI)tonConnectUI.openModal();else initWallet().then(()=>{if(tonConnectUI)tonConnectUI.openModal();});}
