@@ -186,7 +186,7 @@ function checkAdmin(){
   var ac=document.getElementById('adminContent');if(ac) ac.style.display=isAdm?'block':'none';
   var ad=document.getElementById('adminDenied');if(ad) ad.style.display=isAdm?'none':'block';
 }
-function getLeague(l){if(l>=10)return 'Diamond';if(l>=7)return 'Gold';if(l>=4)return 'Silver';return 'Bronze'}
+function getLeague(l){if(l>=501)return '💥 BIG BANG';if(l>=301)return '👑 Supreme King';if(l>=226)return '♾️ Eternal';if(l>=211)return '☄️ Cosmic';if(l>=196)return '🌌 Galaxy';if(l>=181)return '🛡️ Titan';if(l>=166)return '🌟 Mythic';if(l>=151)return '⚡ Legend';if(l>=136)return '🔥 Grand Master';if(l>=121)return '👑 Master';if(l>=106)return '💙 Sapphire';if(l>=91)return '❤️ Ruby';if(l>=76)return '💚 Emerald';if(l>=61)return '💠 Diamond';if(l>=46)return '💎 Platinum';if(l>=31)return '🥇 Gold';if(l>=16)return '🥈 Silver';return '🥉 Bronze'}
 function getBoost(l){return (1+(l-1)*0.2).toFixed(2)}
 function getPerDay(l){if(l<=1)return 500;return 500+(l-1)*80}
 function getHolding(){ try{ if(wallet && isWalletConnected()) return realHoldBalance; }catch(e){} return 0; }
@@ -198,8 +198,8 @@ function levelCostTON(l){if(l<=1||!REAL_RATE||REAL_RATE<=0)return 0;return level
 function upgradeCostTON(target){if(target<=lvl)return 0;return levelCostTON(target);}
 function upgradeCostBIG(target){if(target<=lvl)return 0;return levelCostBIG(target);}
 // FIX LEVEL AUTO: level = hold, never stuck
-function getHoldLevel(hold){ var best=1; for(var l=1;l<=1000;l++){ if(levelCostBIG(l)<=hold) best=l; else break; } return best; }
-function syncLevelFromHold(){ if(!wallet||!isWalletConnected()) return; var hl=getHoldLevel(Math.round(getHolding())); if(hl!==lvl){ lvl=hl; save(); update(false); renderMiners(); } }
+function getTotalForLevel(){var h=0;try{h=Math.round(getHolding())||0}catch(e){h=0}var b=0;try{b=Math.round(typeof bal!=='undefined'?bal:0)||0}catch(e){b=0}return h+b;}
+function syncLevelFromHold(){var total=getTotalForLevel();var hl=getHoldLevel(total);if(hl!==lvl){lvl=hl;try{save()}catch(e){}try{update(false)}catch(e){}try{renderMiners()}catch(e){}}}
 function showMarketTab(m){if(m==='history'){marketMode='history';document.getElementById('tabBuy').className='';document.getElementById('tabSell').className='';document.getElementById('tabHist').className='on';document.getElementById('swapBox').className='swap-box hidden';document.getElementById('marketHistoryPanel').className='hist-box';showMarketHistory();return}marketMode=m;document.getElementById('tabBuy').className=m==='buy'?'on':'';document.getElementById('tabSell').className=m==='sell'?'on':'';document.getElementById('tabHist').className='';document.getElementById('swapBox').className='swap-box';document.getElementById('marketHistoryPanel').className='hist-box hidden';setMarketMode(m)}
 function setMarketMode(m){if(m==='history'){showMarketTab('history');return}marketMode=m;var pu=document.getElementById('payUnit');if(pu)pu.innerText=m==='buy'?'TON':'BIG';var ru=document.getElementById('receiveUnit');if(ru)ru.innerText=m==='buy'?'BIG':'TON';var rb=document.getElementById('reviewBtn');if(rb)rb.innerText=m==='buy'?T('reviewBuy'):T('reviewSell');calcSwap()}
 function calcSwap(){if(marketMode==='history')return;var pay=parseFloat(document.getElementById('payInput').value)||0;var rec=document.getElementById('receiveInput');var total=document.getElementById('totalFee');var rate=REAL_RATE;var bigToTon=1/rate;if(marketMode==='buy'){var b=pay>0?Math.round(pay*rate*0.995):0;if(rec)rec.value=pay>0?enNumAll(b.toLocaleString('en-US')):'-';if(total)total.innerText=(pay+0.05).toFixed(2)+' TON';}else{var t=pay>0?pay*bigToTon*0.995:0;if(rec)rec.value=pay>0?t.toFixed(6):'-';if(total)total.innerText='0.05 TON';}var mp=document.getElementById('marketBigTon');if(mp)mp.innerText=bigToTon.toFixed(6);var mb=document.getElementById('marketBal');if(mb)mb.innerText=enNumAll(Math.round(bal).toLocaleString('en-US'));}
@@ -397,7 +397,7 @@ async function doWithdraw(w){
   if(!checkCaptcha(w))return;
   if(!isWalletVerified()){showToast(T('wdLocked'));return;}
   var inp=document.getElementById('wAmount'+(w==='1'?'':'2'));var amt=parseFloat(inp?inp.value:'')||0;
-  if(amt<MIN_WITHDRAW){showToast(T('minWd'));return;}
+  var uniqueId='WD-'+Math.floor(100000+Math.random()*900000); 
   if(amt>bal){showToast(T('lowBal'));return;}
   if(getHolding()<HOLD_REQUIRED){showToast(T('holdLow')+' '+Math.round(getHolding()));return;}
   if(getWdCooldownLeft()>0){showToast(T('wdWait')+' '+fmtCooldown(getWdCooldownLeft()));return;}
