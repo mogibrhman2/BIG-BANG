@@ -189,8 +189,8 @@ function checkAdmin(){
 function getLeague(l){if(l>=501)return '💥 BIG BANG';if(l>=301)return '👑 Supreme King';if(l>=226)return '♾️ Eternal';if(l>=211)return '☄️ Cosmic';if(l>=196)return '🌌 Galaxy';if(l>=181)return '🛡️ Titan';if(l>=166)return '🌟 Mythic';if(l>=151)return '⚡ Legend';if(l>=136)return '🔥 Grand Master';if(l>=121)return '👑 Master';if(l>=106)return '💙 Sapphire';if(l>=91)return '❤️ Ruby';if(l>=76)return '💚 Emerald';if(l>=61)return '💠 Diamond';if(l>=46)return '💎 Platinum';if(l>=31)return '🥇 Gold';if(l>=16)return '🥈 Silver';return '🥉 Bronze'}
 function getBoost(l){return (1+(l-1)*0.2).toFixed(2)}
 function getPerDay(l){if(l<=1)return 500;return 500+(l-1)*80}
-function getHolding(){ try{ if(wallet && isWalletConnected()) return realHoldBalance; }catch(e){} return 0; }
 function getPool(){return bal}
+if(!wallet) return 0;
 function getAssets(){return getPool()+getHolding()}
 function levelCostBIG(l){if(l<=1)return 0;return getPerDay(l);}
 function levelCostUSD(l){return levelCostBIG(l)*BIG_PRICE_USD;}
