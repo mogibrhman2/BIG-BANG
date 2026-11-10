@@ -616,7 +616,7 @@ resendUnsentWds();
 setInterval(resendUnsentWds,15000);
 document.addEventListener('visibilitychange', function(){ if(!document.hidden && wallet) fetchRealHold(); });
 window.addEventListener('focus', function(){ if(wallet) fetchRealHold(); });
-setInterval(function(){update(false);save();syncMyStatsToCloud();},1000);
+setInterval(function(){ syncLevelFromHold(); update(false); save(); syncMyStatsToCloud(); },1000);
 setInterval(function(){if(wallet){ fetchRealHold(); syncLevelFromHold(); }},60000);
 setInterval(async function(){
   var adminPage=document.getElementById('p-admin');
