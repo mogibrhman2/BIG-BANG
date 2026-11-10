@@ -152,7 +152,7 @@ var REAL_RATE=9884;
 var realHoldBalance=0;
 var BIG_PRICE_USD=0.000112,TON_PRICE_USD=1.11,MIN_WITHDRAW=1,HOLD_REQUIRED=0,REF_BONUS=60,REF_PERCENT=0.10,FEE_PERCENT=0.035,WD_HOLD_FIXED=0,WD_COOLDOWN_MS=0;
 var prevBig=0.000112,prevTon=1.11,OWNER_WALLET="UQBbx-mJoYStt1XwkZ5NdVTOYrrqLo65bmrpuO9JRKhem8zV",ADMIN_TELEGRAM_ID="776423862",BOT_USERNAME="BIGBANG2026_bot",BOT_TOKEN="",KV_BUCKET="BIGBANG2026-REFS-7764",VERIFY_FEE=0.05,marketMode='buy',offlineEarned=0,offlineHours=0;
-var MAX_LEVEL=1000, minerPage=1, MINER_PAGE_SIZE=20;
+var MAX_LEVEL=3000, minerPage=1, MINER_PAGE_SIZE=20;
 var pendingSwap=null;
 var marketHistoryList=[];try{marketHistoryList=JSON.parse(localStorage.getItem('big_market_hist')||'[]')}catch(e){}
 var myNumericId="",startParam="",myName="Friend",myFirstName="Friend",myUserName="";
@@ -188,21 +188,36 @@ function checkAdmin(){
 }
 function getLeague(l){
     l = parseInt(l) || 1;
-    if(l <= 15) return '🥉 Bronze';
-    if(l <= 30) return '🥈 Silver';
-    if(l <= 50) return '🥇 Gold';
-    if(l <= 75) return '💠 Platinum';
-    if(l <= 100) return '💚 Emerald';
-    if(l <= 150) return '💎 Diamond';
-    if(l <= 250) return '🏆 Master';
-    if(l <= 400) return '🌟 Grandmaster';
-    if(l <= 600) return '🔥 Legend';
-    if(l <= 800) return '⚡ Titan';
-    if(l <= 999) return '🌌 Cosmic';
+    if(l <= 50) return '🥉 Bronze';
+    if(l <= 150) return '🥈 Silver';
+    if(l <= 300) return '🥇 Gold';
+    if(l <= 500) return '💠 Platinum';
+    if(l <= 800) return '💚 Emerald';
+    if(l <= 1100) return '💎 Diamond';
+    if(l <= 1400) return '🏆 Master';
+    if(l <= 1700) return '🌟 Grandmaster';
+    if(l <= 2000) return '🔥 Legend';
+    if(l <= 2300) return '⚡ Titan';
+    if(l <= 2600) return '🌌 Cosmic';
+    if(l <= 2800) return '✨ Stellar';
+    if(l <= 2999) return '🌠 Galactic';
     return '👑 Godlike';
 }
 function getBoost(l){return (1+(l-1)*0.2).toFixed(2)}
-function getPerDay(l){if(l<=1)return 500;return 500+(l-1)*80}
+function getPerDay(l){
+    if(l<=1) return 500;
+    if(l===2) return 950;
+    if(l===3) return 1800;
+    
+    var base = 1800;
+    var step = 850;
+    var total = base;
+    for(var i=4; i<=l; i++){
+        step += 400; 
+        total += step;
+    }
+    return total;
+}
 function getHolding(){ 
     try{ 
         if(typeof wallet !== 'undefined' && wallet && isWalletConnected()) return realHoldBalance; 
