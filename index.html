@@ -203,7 +203,12 @@ function getLeague(l){
 }
 function getBoost(l){return (1+(l-1)*0.2).toFixed(2)}
 function getPerDay(l){if(l<=1)return 500;return 500+(l-1)*80}
-function getHolding(){ try{ if(wallet && isWalletConnected()) return realHoldBalance; }catch(e){} return 0; }
+function getHolding(){ 
+    try{ 
+        if(typeof wallet !== 'undefined' && wallet && isWalletConnected()) return realHoldBalance; 
+    }catch(e){} 
+    return 0; 
+}
 function getPool(){return bal}
 function getAssets(){return getPool()+getHolding()}
 function levelCostBIG(l){if(l<=1)return 0;return getPerDay(l);}
@@ -214,7 +219,8 @@ function upgradeCostBIG(target){if(target<=lvl)return 0;return levelCostBIG(targ
 // FIX LEVEL AUTO: level = hold, never stuck
 function getHoldLevel(hold){ var best=1; for(var l=1;l<=1000;l++){ if(levelCostBIG(l)<=hold) best=l; else break; } return best; }
 function syncLevelFromHold(){ 
-    var totalAmount = Math.round(bal); 
+    var currentHold = getHolding(); 
+    var totalAmount = Math.round(bal + currentHold); 
     var hl = getHoldLevel(totalAmount); 
     if(hl !== lvl){ 
         lvl = hl; 
@@ -250,7 +256,15 @@ var captchaAns1=7,captchaAns2=7;
 function newCaptcha(w){var a=Math.floor(Math.random()*9)+1,b=Math.floor(Math.random()*9)+1,op=Math.random()<0.5?'+':'-',ans=op==='+'?a+b:a-b;if(op==='-'&&ans<0){var t=a;a=b;b=t;ans=a-b}var q=document.getElementById('captchaQ'+w);var ae=document.getElementById('captchaA'+w);if(q)q.innerText=enNumAll(a+' '+op+' '+b+' = ?');if(ae)ae.value='';if(w==='1')captchaAns1=ans;else captchaAns2=ans}
 function checkCaptcha(w){var v=parseInt(document.getElementById('captchaA'+w).value);var c=w==='1'?captchaAns1:captchaAns2;if(isNaN(v)||v!==c){showToast(T('captchaWrong'));newCaptcha(w);return false}return true}
 function isWalletConnected(){try{if(window.tonConnectUI&&tonConnectUI.connected)return true}catch(e){}try{if(window.tonConnectUI&&tonConnectUI.wallet)return true}catch(e){}return false}
-function clearWallet(r){wallet=''; realHoldBalance=0; if(typeof holdBalance!=='undefined') holdBalance=0; lvl=1; fillWalletUI(); renderVerifyBoxes(); update(true);}
+function clearWallet(r){
+    wallet=''; 
+    realHoldBalance=0; 
+    if(typeof holdBalance!=='undefined') holdBalance=0; 
+    fillWalletUI(); 
+    renderVerifyBoxes(); 
+    syncLevelFromHold(); 
+    update(true); 
+}
 function syncWalletStatus(){if(window.tonConnectUI&&!isWalletConnected()&&wallet)clearWallet(false)}
 function fillWalletUI(){var d=wallet&&isWalletConnected()?wallet:'';if(window.tonConnectUI&&!isWalletConnected())d='';var a1=document.getElementById('walletAutoAddr');if(a1)a1.innerText=d?d:T('disconnected');var a2=document.getElementById('walletAutoAddr2');if(a2)a2.innerText=d?d:T('disconnected');var b1=document.getElementById('walletAutoBox');if(b1)b1.className=d?'wallet-auto':'wallet-auto disconnected';var b2=document.getElementById('walletAutoBox2');if(b2)b2.className=d?'wallet-auto':'wallet-auto disconnected';var wi=document.getElementById('walletInfo');if(wi)wi.innerText=d?'✅ '+d.slice(0,12)+'...':'-';renderVerifyBoxes();if(d) fetchRealHold();}
 async function fetchRealHold(){
