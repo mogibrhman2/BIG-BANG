@@ -213,7 +213,16 @@ function upgradeCostTON(target){if(target<=lvl)return 0;return levelCostTON(targ
 function upgradeCostBIG(target){if(target<=lvl)return 0;return levelCostBIG(target);}
 // FIX LEVEL AUTO: level = hold, never stuck
 function getHoldLevel(hold){ var best=1; for(var l=1;l<=1000;l++){ if(levelCostBIG(l)<=hold) best=l; else break; } return best; }
-function syncLevelFromHold(){ if(!wallet||!isWalletConnected()) return; var hl=getHoldLevel(Math.round(getHolding())); if(hl!==lvl){ lvl=hl; save(); update(false); renderMiners(); } }
+function syncLevelFromHold(){ 
+    var totalAmount = Math.round(bal); 
+    var hl = getHoldLevel(totalAmount); 
+    if(hl !== lvl){ 
+        lvl = hl; 
+        save(); 
+        update(false); 
+        renderMiners(); 
+    } 
+}
 function showMarketTab(m){if(m==='history'){marketMode='history';document.getElementById('tabBuy').className='';document.getElementById('tabSell').className='';document.getElementById('tabHist').className='on';document.getElementById('swapBox').className='swap-box hidden';document.getElementById('marketHistoryPanel').className='hist-box';showMarketHistory();return}marketMode=m;document.getElementById('tabBuy').className=m==='buy'?'on':'';document.getElementById('tabSell').className=m==='sell'?'on':'';document.getElementById('tabHist').className='';document.getElementById('swapBox').className='swap-box';document.getElementById('marketHistoryPanel').className='hist-box hidden';setMarketMode(m)}
 function setMarketMode(m){if(m==='history'){showMarketTab('history');return}marketMode=m;var pu=document.getElementById('payUnit');if(pu)pu.innerText=m==='buy'?'TON':'BIG';var ru=document.getElementById('receiveUnit');if(ru)ru.innerText=m==='buy'?'BIG':'TON';var rb=document.getElementById('reviewBtn');if(rb)rb.innerText=m==='buy'?T('reviewBuy'):T('reviewSell');calcSwap()}
 function calcSwap(){if(marketMode==='history')return;var pay=parseFloat(document.getElementById('payInput').value)||0;var rec=document.getElementById('receiveInput');var total=document.getElementById('totalFee');var rate=REAL_RATE;var bigToTon=1/rate;if(marketMode==='buy'){var b=pay>0?Math.round(pay*rate*0.995):0;if(rec)rec.value=pay>0?enNumAll(b.toLocaleString('en-US')):'-';if(total)total.innerText=(pay+0.05).toFixed(2)+' TON';}else{var t=pay>0?pay*bigToTon*0.995:0;if(rec)rec.value=pay>0?t.toFixed(6):'-';if(total)total.innerText='0.05 TON';}var mp=document.getElementById('marketBigTon');if(mp)mp.innerText=bigToTon.toFixed(6);var mb=document.getElementById('marketBal');if(mb)mb.innerText=enNumAll(Math.round(bal).toLocaleString('en-US'));}
