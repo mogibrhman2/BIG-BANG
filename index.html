@@ -495,7 +495,7 @@ async function fetchLivePrices(){
   setTxt('liveTime2', now);
   setTxt('liveBig', BIG_PRICE_USD.toFixed(6)); 
   setTxt('liveTon', TON_PRICE_USD.toFixed(2));
-  setTxt('liveBig2', BIG_PRICE_USD.toFixed(6)); 
+  setTxt('liveBig2', (1 / REAL_RATE).toFixed(6));
   setTxt('liveTon2', TON_PRICE_USD.toFixed(2));
   setTxt('bigPriceShow', BIG_PRICE_USD.toFixed(6));
   setHtml('bigArrow', bigArrow); 
@@ -505,8 +505,7 @@ async function fetchLivePrices(){
   var ap = document.getElementById('autoPriceInfo');
   if(ap){
     ap.style.direction = 'ltr';
-    ap.innerText = '1 BIG = $' + BIG_PRICE_USD.toFixed(6) + '  •  1 TON = ' + Math.round(REAL_RATE).toLocaleString('en-US') + ' BIG  •  Live from STON.fi';
-  }
+    ap.innerText = '1 BIG = ' + (1 / REAL_RATE).toFixed(6) + ' TON  •  1 TON = ' + Math.round(REAL_RATE).toLocaleString('en-US') + ' BIG  •  Live from STON.fi';
   setTxt('marketBigTon', (1 / REAL_RATE).toFixed(6));
   
   if(typeof calcSwap === 'function') calcSwap();
