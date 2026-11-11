@@ -204,26 +204,19 @@ function getLeague(l){
 }
 function getBoost(l){
     if(l <= 1) return '1.0';
-    var boost = 1.0 + ((l - 1) * 0.4);
-    return boost.toFixed(1);
+    var boost = 1.0 + ((l - 1) * 0.008); 
+    return boost.toFixed(2);
 }
 function getPerDay(l){
     if(l <= 1) return 360;
-    if(l === 2) return 450;
-    if(l === 3) return 614;
-    if(l === 4) return 826;
-    if(l === 5) return 1077;
-    
-    var base = 1077;
-    var multiplier = 1.35;
-    var total = base;
-    
-    for(var i=6; i<=l; i++){
-        total = total * multiplier;
-        multiplier = multiplier + 0.002; 
-    }
+    var startAmount = 360;
+    var maxLevel = 500;
+    var maxAmount = 60000;
+    var step = (maxAmount - startAmount) / (maxLevel - 1);
+    if (l >= maxLevel) return maxAmount;
+    var total = startAmount + ((l - 1) * step);
     return Math.round(total);
-}  
+}
 function getHolding(){ 
     try{ 
         if(typeof wallet !== 'undefined' && wallet && isWalletConnected()) return realHoldBalance; 
@@ -403,7 +396,7 @@ function showToast(m){var t=document.getElementById('toast');if(!t)return;t.inne
 function saveTxInputs(){try{var ins=document.querySelectorAll('input[id^="tx-"]');for(var i=0;i<ins.length;i++)savedTx[ins[i].id]=ins[i].value}catch(e){}}
 function restoreTxInputs(){try{var ins=document.querySelectorAll('input[id^="tx-"]');for(var i=0;i<ins.length;i++)if(savedTx[ins[i].id]!==undefined)ins[i].value=savedTx[ins[i].id]}catch(e){}}
 async function pasteTx(idx){try{var txt=await navigator.clipboard.readText();if(txt){txt=txt.trim();var el=document.getElementById('tx-'+idx);if(el){el.value=txt;savedTx['tx-'+idx]=txt}showToast(T('copied'));return}}catch(e){}showToast(T('pasteBtn'))}
-function fmt(n){if(!isFinite(n))return '0.00';if(n>=1000000)return enNumAll((n/1000000).toFixed(2))+'M';return enNumAll(n.toLocaleString('en-US',{maximumFractionDigits:2}))}
+function fmt(n){if(!isFinite(n) || isNaN(n)) return '0';if(n >= 1000000) return enNumAll((n/1000000).toFixed(2)) + 'M';return enNumAll(Math.round(n).toLocaleString('en-US'));}
 function priceBigForLevel(t){return levelCostBIG(t)}
 function bigToTon(b){return b*BIG_PRICE_USD/TON_PRICE_USD}
 function bigToUsd(b){return b*BIG_PRICE_USD}
