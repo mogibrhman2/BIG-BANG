@@ -204,22 +204,25 @@ function getLeague(l){
 }
 function getBoost(l){
     if(l <= 1) return '1.0';
-    // در لول 500 بوست حدود 5.0 می‌شود (یعنی 5 برابر)
-    var boost = 1.0 + ((l - 1) * 0.008); 
+    var boost = 1.0 + ((l - 1) * 0.01); 
     return boost.toFixed(2);
 }
 function getPerDay(l){
-    if(l <= 1) return 30;
+    if(l <= 1) return 100; 
     
-    var startAmount = 30;
-    var maxLevel = 500;
-    var maxAmount = 60000;
+    if(l <= 100) {
+        var base = 100;
+        var target = 2800;
+        var total = base + ((target - base) * Math.pow((l - 1) / 99, 1.5));
+        return Math.round(total);
+    }
     
-    var step = (maxAmount - startAmount) / (maxLevel - 1);
+    var base100 = 2800;
+    var growthRate = 1.025; 
+    var total = base100 * Math.pow(growthRate, (l - 100));
     
-    if (l >= maxLevel) return maxAmount;
+    if(total > 25000) return 25000;
     
-    var total = startAmount + ((l - 1) * step);
     return Math.round(total);
 }
 function getHolding(){ 
