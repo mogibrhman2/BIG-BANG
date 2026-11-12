@@ -104,7 +104,21 @@ body{background:linear-gradient(180deg,#020f2a,#021e1e 40%,#02120a);color:#fff;f
 <div id="p-market" class="hidden">
 <div class="top"><div></div></div>
 <div class="market-head"><h1 data-t="market"></h1><p data-t="marketSub"></p></div>
-<div class="market-pair"><div><b>BIG / TON</b><div class="market-price" style="margin-top:8px"><span id="marketBigTon">0.000101</span> <span>TON</span></div><small style="color:#8ad8ff" data-t="marketPriceNote"></small></div><div style="background:#02120a;border:1px solid #00c2ff;padding:6px 12px;border-radius:20px;font-size:12px;font-weight:900">STON.fi ↗</div></div>
+<div class="market-pair" style="flex-direction:column;align-items:flex-start;gap:12px">
+  <div style="width:100%;display:flex;justify-content:space-between;align-items:center">
+    <b>TON</b>
+    <div class="market-price"><span style="color:#fff">$<span id="marketTonUsd">1.11</span></span> <span style="color:#22ff88;font-size:20px" id="tonArrow">🟢↑</span></div>
+  </div>
+  <div style="width:100%;height:1px;background:#00c2ff33"></div>
+  <div style="width:100%;display:flex;justify-content:space-between;align-items:center">
+    <b>BIG</b>
+    <div class="market-price"><span style="color:#fff"><span id="marketBigTon">0.000101</span> TON</span> <span style="color:#22ff88;font-size:20px" id="bigArrowMarket">🟢↑</span></div>
+  </div>
+  <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+    <small style="color:#8ad8ff" data-t="marketPriceNote"></small>
+    <div style="background:#02120a;border:1px solid #00c2ff;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:900">STON.fi ↗</div>
+  </div>
+</div>
 <div class="market-tabs"><button id="tabHist" onclick="showMarketTab('history')" data-t="history"></button><button id="tabSell" onclick="showMarketTab('sell')" data-t="sell"></button><button id="tabBuy" class="on" onclick="showMarketTab('buy')" data-t="buy"></button></div>
 <div id="swapBox" class="swap-box"><label id="payLabel" data-t="youPay"></label><div class="swap-input"><input id="payInput" type="number" value="1" oninput="calcSwap()"><b id="payUnit">TON</b><button onclick="setMaxPay()" data-t="max"></button></div><small style="color:#8ad8ff"><span data-t="balance"></span>: <span id="marketBal">0</span> BIG</small><div class="swap-arrow">⇅</div><label data-t="youReceive"></label><div class="swap-input"><input id="receiveInput" readonly value="-"><b id="receiveUnit" style="color:#22ff88">BIG</b></div><small style="color:#8ad8ff" data-t="marketNote"></small><div style="margin-top:12px"><div class="fee-row"><span data-t="serviceFee"></span><b>0.05 TON</b></div><div class="fee-row"><span data-t="slippage"></span><b>0.5%</b></div><div class="fee-total"><span data-t="swapFee"></span><b id="totalFee">1.05 TON</b></div></div><button class="review-btn" id="reviewBtn" onclick="reviewPurchase()" data-t="reviewBuy"></button><button class="btn btn2" onclick="openSton()" style="width:100%;margin:10px 0 0" data-t="openSton"></button></div>
 <div id="marketHistoryPanel" class="hist-box hidden"><b data-t="historyTitle"></b><div id="marketHistory"></div><button class="btn btn2" onclick="showMarketTab('buy')" style="width:100%;margin:12px 0 0" data-t="backToBuy"></button></div>
