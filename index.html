@@ -704,7 +704,7 @@ async function renderAdmin(){
     else {statusTxt=T('statusPending');statusCls='wd-status-pending';}
     
     var isPending = x.status==='pending';
-    var txInput = isPending ? '<div style="direction:rtl;font-size:13px;color:#c8e8ff;margin-top:10px">'+T('txLabel')+' / '+T('reasonLabel')+'</div><div class="tx-wrap"><input id="tx-'+idx+'" placeholder="'+T('txPlaceholder')+'" value="'+(x.tx||'')+'"><button class="paste-btn" onclick="pasteTx('+idx+')">'+T('pasteBtn')+'</button></div>' : '';
+    var txInput = isPending ? '<div style="direction:rtl;font-size:13px;color:#c8e8ff;margin-top:10px">'+T('txLabel')+' / '+T('reasonLabel')+'</div><div class="tx-wrap"><input id="tx-'+idx+'" name="tx_input_'+idx+'" placeholder="'+T('txPlaceholder')+'" value="'+(x.tx||'')+'" autocomplete="new-password" autocorrect="off" autocapitalize="off" spellcheck="false"><button class="paste-btn" onclick="pasteTx('+idx+')">'+T('pasteBtn')+'</button></div>' : '';
     var btns = isPending ? '<div class="admin-btns"><button class="admin-ok" onclick="adminAction('+idx+',\'paid\')">'+T('approveBtn')+'</button><button class="admin-no" onclick="adminAction('+idx+',\'rejected\')">'+T('rejectBtn')+'</button></div>' : '';
     var showTx = (x.status==='paid' && x.tx) ? '<div class="wd-hist-tx"><a href="https://tonscan.org/tx/'+x.tx+'" target="_blank">'+x.tx+'</a></div>' : '';
     var showReason = (x.status==='rejected' && x.rejectReason) ? '<div style="direction:rtl;font-size:13px;color:#ff6b6b;margin-top:8px">'+T('reasonLabel')+' '+x.rejectReason+'</div>' : '';
