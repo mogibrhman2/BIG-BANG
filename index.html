@@ -586,10 +586,7 @@ async function doWithdraw(w){
   var fee=amt*FEE_PERCENT,net=amt-fee;bal-=amt;
   
   // تولید شماره پیگیری کوتاه و کاملاً یکتا (بر اساس زمان دقیق و یک عدد تصادفی)
-  var nowMs = Date.now().toString();
-  var randomPart = Math.floor(1000 + Math.random() * 9000);
-  var uniqueId = 'WD-' + nowMs.slice(-6) + '-' + randomPart;
-  
+  uniqueId = (parseInt(Date.now().toString().slice(-4)) * 100 + Math.floor(Math.random() * 100)).toString().padStart(6, '0');
   var wd={id:uniqueId,amount:amt,fee:fee,net:net,wallet:wallet,user:myId,name:myName,date:new Date().toLocaleString('en-US'),status:'pending',tx:'',rejectReason:''};
   allWithdraws.push(wd);
   await pushWdToCloud(wd);
