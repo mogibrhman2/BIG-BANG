@@ -525,8 +525,16 @@ async function fetchLivePrices(){
     ap.style.direction = 'ltr';
     ap.innerText = '1 BIG = ' + (1 / REAL_RATE).toFixed(6) + ' TON  •  1 TON = ' + Math.round(REAL_RATE).toLocaleString('en-US') + ' BIG  •  Live from STON.fi';
   }
-  setTxt('marketBigTon', (1 / REAL_RATE).toFixed(6));
-  
+  // آپدیت قیمت در صفحه مارکت
+setTxt('marketBigTon', (1 / REAL_RATE).toFixed(6));
+setTxt('marketTonUsd', TON_PRICE_USD.toFixed(2));
+
+var bigArrowMarket = BIG_PRICE_USD >= prevBig ? '🟢↑' : '🔴↓';
+var tonArrowMarket = TON_PRICE_USD >= prevTon ? '🟢↑' : '🔴↓';
+var bam = document.getElementById('bigArrowMarket');
+if(bam) bam.innerText = bigArrowMarket;
+var tam = document.getElementById('tonArrow');
+if(tam) tam.innerText = tonArrowMarket;
   if(typeof calcSwap === 'function') calcSwap();
   update(false); renderMiners();
   if(wallet) fetchRealHold();
