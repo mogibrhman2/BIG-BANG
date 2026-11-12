@@ -188,18 +188,20 @@ function checkAdmin(){
 }
 function getLeague(l){
     l = parseInt(l) || 1;
-    if(l <= 10) return '🥉 Bronze';
-    if(l <= 25) return '🥈 Silver';
-    if(l <= 50) return '🥇 Gold';
-    if(l <= 100) return '💠 Platinum';
-    if(l <= 200) return '💚 Emerald';
-    if(l <= 350) return '💎 Diamond';
-    if(l <= 500) return '🏆 Master';
-    if(l <= 700) return '🌟 Grandmaster';
-    if(l <= 850) return '🔥 Legend';
-    if(l <= 950) return '⚡ Titan';
-    if(l <= 999) return '🌌 Cosmic';
-    return '👑 Godlike';
+    
+    if(l <= 10) return '🥉 Bronze';        // برنز (لول 1 تا 10)
+    if(l <= 25) return '🥈 Silver';        // نقره (لول 11 تا 25)
+    if(l <= 50) return '🥇 Gold';          // طلا (لول 26 تا 50)
+    if(l <= 100) return '💠 Platinum';     // پلاتینیوم (لول 51 تا 100)
+    if(l <= 200) return '💚 Emerald';      // زمرد (لول 101 تا 200)
+    if(l <= 350) return '💎 Diamond';      // الماس (لول 201 تا 350)
+    if(l <= 500) return '🏆 Master';       // استاد (لول 351 تا 500)
+    if(l <= 700) return '🌟 Grandmaster';  // گرند مستر (لول 501 تا 700)
+    if(l <= 850) return '🔥 Legend';       // اسطوره (لول 701 تا 850)
+    if(l <= 950) return '⚡ Titan';        // تایتان (لول 851 تا 950)
+    if(l <= 999) return '🌌 Cosmic';       // کیهانی (لول 951 تا 999)
+    
+    return '👑 Godlike';                   // خداگونه (لول 1000)
 }
 function getBoost(l){
     if(l <= 1) return '1.0';
