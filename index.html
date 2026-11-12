@@ -613,7 +613,7 @@ function renderHistory(){
   var html='';
   if(!my.length){ html='<div class="hist-empty">'+T('noWd')+'</div>'; }
   else {
-    html = my.slice().reverse().map(function(x){
+    html = my.slice().map(function(x){
       var track=x.id;
       var statusTxt='', statusCls='';
       if(x.status==='paid'){ statusTxt=T('statusPaid'); statusCls='wd-status-paid'; }
