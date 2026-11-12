@@ -483,60 +483,76 @@ function calcWdFee(w){var inp=document.getElementById('wAmount'+(w==='1'?'':'2')
 function updateWdUI(){var ceil=Math.floor(bal),need=WD_HOLD_FIXED,myHold=Math.round(bal+getHolding()),left=getWdCooldownLeft();setTxt('wdCeil',ceil.toLocaleString('en-US'));setTxt('wdCeil2',ceil.toLocaleString('en-US'));setTxt('wdMinHold',need.toLocaleString('en-US'));setTxt('wdMinHold2',need.toLocaleString('en-US'));setTxt('wdMyHold',myHold.toLocaleString('en-US'));setTxt('wdMyHold2',myHold.toLocaleString('en-US'));var nx=left<=0?T('wdNow'):fmtCooldown(left);setTxt('wdNext1',nx);setTxt('wdNext2',nx);var badgeTxt=myHold>=HOLD_REQUIRED?T('holdOk'):T('needCharge');var b1=document.getElementById('wdNeedBadge');if(b1){b1.innerText=badgeTxt;b1.style.background=myHold>=HOLD_REQUIRED?'#062a1e':'#2a1a00';b1.style.color=myHold>=HOLD_REQUIRED?'#22ff88':'#ffcc00'}var b2=document.getElementById('wdNeedBadge2');if(b2){b2.innerText=badgeTxt;b2.style.background=myHold>=HOLD_REQUIRED?'#062a1e':'#2a1a00';b2.style.color=myHold>=HOLD_REQUIRED?'#22ff88':'#ffcc00'}calcWdFee('1');calcWdFee('2')}
 async function fetchLivePrices(){
   try{
+    // 1. دریافت قیمت لحظه‌ای TON از CoinGecko (بسیار دقیق و همیشه آپدیت)
     try{
-        let rTon = await fetch('https://api.ston.fi/v1/assets?asset_address='+TON_ADDR);
-        let dTon = await rTon.json();
-        if(dTon && dTon.asset && dTon.asset.dex_price_usd) TON_PRICE_USD = parseFloat(dTon.asset.dex_price_usd);
+        let rCg = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=the-open-network&vs_currencies=usd');
+        let dCg = await rCg.json();
+        if(dCg && dCg['the-open-network'] && dCg['the-open-network'].usd) {
+            TON_PRICE_USD = dCg['the-open-network'].usd;
+        }
     }catch(e){}
-    try{
-        let rB = await fetch('https://api.ston.fi/v1/assets?asset_address='+BIG_ADDR);
-        let dB = await rB.json();
-        if(dB && dB.asset && dB.asset.dex_price_usd && parseFloat(dB.asset.dex_price_usd) > 0) BIG_PRICE_USD = parseFloat(dB.asset.dex_price_usd);
-    }catch(e){}
+
+    // 2. دریافت نرخ تبدیل BIG به TON از استون‌فای
     try{
         let r = await fetch('https://api.ston.fi/v1/swap/simulate?offer_address='+TON_ADDR+'&ask_address='+BIG_ADDR+'&offer_units=1000000000&slippage_tolerance=0.005');
         let d = await r.json();
         if(d && d.ask_units && Number(d.ask_units) > 0){
             REAL_RATE = Number(d.ask_units) / 1000000000;
-            if(TON_PRICE_USD > 0) BIG_PRICE_USD = TON_PRICE_USD / REAL_RATE;
+            // محاسبه قیمت دقیق دلاری BIG بر اساس قیمت TON
+            if(TON_PRICE_USD > 0) {
+                BIG_PRICE_USD = TON_PRICE_USD / REAL_RATE;
+            }
         }
     }catch(e){}
+
   }catch(e){}
 
+  // اگر به هر دلیلی خطا داد، از اعداد پیش‌فرض استفاده کن
   if(!BIG_PRICE_USD || BIG_PRICE_USD <= 0) BIG_PRICE_USD = 0.00015;
   if(!TON_PRICE_USD || TON_PRICE_USD <= 0) TON_PRICE_USD = 1.11;
   if(!REAL_RATE || REAL_RATE <= 0) REAL_RATE = 6578;
 
+  // --- محاسبه فلش‌های بالا و پایین ---
   var bigArrow = BIG_PRICE_USD >= prevBig ? '🟢↑' : '🔴↓';
   var tonArrow = TON_PRICE_USD >= prevTon ? '🟢↑' : '🔴↓';
   prevBig = BIG_PRICE_USD;
   prevTon = TON_PRICE_USD;
   var now = new Date().toLocaleTimeString('en-US');
   
-  setTxt('liveTime', now); setTxt('liveTime2', now);
-  setTxt('liveBig', BIG_PRICE_USD.toFixed(6)); setTxt('liveTon', TON_PRICE_USD.toFixed(2));
+  // --- آپدیت کردن صفحه ماینرها ---
+  setTxt('liveTime', now); 
+  setTxt('liveTime2', now);
+  setTxt('liveBig', BIG_PRICE_USD.toFixed(6)); 
+  setTxt('liveTon', TON_PRICE_USD.toFixed(2));
   setTxt('liveBig2', (1 / REAL_RATE).toFixed(6)); 
   setTxt('liveTon2', TON_PRICE_USD.toFixed(2));
   setTxt('bigPriceShow', BIG_PRICE_USD.toFixed(6));
-  setHtml('bigArrow', bigArrow); setHtml('bigArrow3', bigArrow); setHtml('tonArrow2', tonArrow);
+  setHtml('bigArrow', bigArrow); 
+  setHtml('bigArrow3', bigArrow); 
+  setHtml('tonArrow2', tonArrow);
   
   var ap = document.getElementById('autoPriceInfo');
   if(ap){
     ap.style.direction = 'ltr';
     ap.innerText = '1 BIG = ' + (1 / REAL_RATE).toFixed(6) + ' TON  •  1 TON = ' + Math.round(REAL_RATE).toLocaleString('en-US') + ' BIG  •  Live from STON.fi';
   }
-  // آپدیت قیمت در صفحه مارکت
-setTxt('marketBigTon', (1 / REAL_RATE).toFixed(6));
-setTxt('marketTonUsd', TON_PRICE_USD.toFixed(2));
 
-var bigArrowMarket = BIG_PRICE_USD >= prevBig ? '🟢↑' : '🔴↓';
-var tonArrowMarket = TON_PRICE_USD >= prevTon ? '🟢↑' : '🔴↓';
-var bam = document.getElementById('bigArrowMarket');
-if(bam) bam.innerText = bigArrowMarket;
-var tam = document.getElementById('tonArrow');
-if(tam) tam.innerText = tonArrowMarket;
+  // --- آپدیت کردن صفحه مارکت (بخش جدید) ---
+  setTxt('marketBigTon', (1 / REAL_RATE).toFixed(6));
+  setTxt('marketTonUsd', TON_PRICE_USD.toFixed(2));
+  
+  var bigArrowMarket = BIG_PRICE_USD >= prevBig ? '🟢↑' : '🔴↓';
+  var tonArrowMarket = TON_PRICE_USD >= prevTon ? '🟢↑' : '🔴↓';
+  
+  var bam = document.getElementById('bigArrowMarket');
+  if(bam) bam.innerText = bigArrowMarket;
+  var tam = document.getElementById('tonArrow');
+  if(tam) tam.innerText = tonArrowMarket;
+  
+  // --- آپدیت نهایی ---
   if(typeof calcSwap === 'function') calcSwap();
-  update(false); renderMiners();
+  update(false); 
+  renderMiners();
   if(wallet) fetchRealHold();
 }
 if(window._bigPriceTimer)clearInterval(window._bigPriceTimer);
