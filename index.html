@@ -576,18 +576,39 @@ function withdrawFromProfile(){doWithdraw('2');}
 async function doWithdraw(w){
   if(!checkCaptcha(w))return;
   if(!isWalletVerified()){showToast(T('wdLocked'));return;}
+  
   var inp=document.getElementById('wAmount'+(w==='1'?'':'2'));var amt=parseFloat(inp?inp.value:'')||0;
   if(amt<MIN_WITHDRAW){showToast(T('minWd'));return;}
   if(amt>bal){showToast(T('lowBal'));return;}
   if(getHolding()<HOLD_REQUIRED){showToast(T('holdLow')+' '+Math.round(getHolding()));return;}
   if(getWdCooldownLeft()>0){showToast(T('wdWait')+' '+fmtCooldown(getWdCooldownLeft()));return;}
+  
   var fee=amt*FEE_PERCENT,net=amt-fee;bal-=amt;
-  var d=new Date(); var pad=function(n){return String(n).padStart(2,'0')};
-  var uniqueId='WD-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'-'+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds())+'-'+Math.floor(100000+Math.random()*900000);
+  
+  // تولید شماره پیگیری کوتاه و کاملاً یکتا (بر اساس زمان دقیق و یک عدد تصادفی)
+  var nowMs = Date.now().toString();
+  var randomPart = Math.floor(1000 + Math.random() * 9000);
+  var uniqueId = 'WD-' + nowMs.slice(-6) + '-' + randomPart;
+  
   var wd={id:uniqueId,amount:amt,fee:fee,net:net,wallet:wallet,user:myId,name:myName,date:new Date().toLocaleString('en-US'),status:'pending',tx:'',rejectReason:''};
-  allWithdraws.push(wd);await pushWdToCloud(wd);setTimeout(function(){ pushWdToCloud(wd); }, 3000);
+  allWithdraws.push(wd);
+  await pushWdToCloud(wd);
+  setTimeout(function(){ pushWdToCloud(wd); }, 3000);
+  
   try{localStorage.setItem('big_last_wd',String(Date.now()))}catch(e){}
-  save();update(true);renderHistory();showToast(T('reqDone'));sendToAdmin('💸 NEW WD\n'+myId+'\n'+amt+' BIG\nWallet: '+wallet);
+  save();update(true);renderHistory();showToast(T('reqDone'));
+  
+  // ارسال پیام به ادمین با مبلغ کل، کارمزد و مبلغ خالص
+  var adminMsg = '💸 NEW WITHDRAWAL REQUEST\n' +
+                 '--------------------\n' +
+                 '🆔 Tracking: ' + uniqueId + '\n' +
+                 '👤 User: ' + (myName||'') + ' (' + myId + ')\n' +
+                 '💵 Amount: ' + amt + ' BIG\n' +
+                 '📉 Fee (3.5%): ' + fee.toFixed(0) + ' BIG\n' +
+                 '✅ Net to send: ' + net.toFixed(0) + ' BIG\n' +
+                 '💼 Wallet: ' + wallet;
+                 
+  sendToAdmin(adminMsg);
 }
 function renderHistory(){
   var h1=document.getElementById('history'); var h2=document.getElementById('history2');
