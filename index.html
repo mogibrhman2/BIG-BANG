@@ -634,6 +634,20 @@ async function renderAdmin(){
 });
     try{localStorage.setItem('big_all_withdraws',JSON.stringify(allWithdraws))}catch(e){}
   }
+  // ارسال پیام درخواست‌های جدید به تلگرام ادمین
+try {
+    var sentKey = 'big_sent_ids';
+    var sentIds = JSON.parse(localStorage.getItem(sentKey) || '[]');
+    for (var k = 0; k < allWithdraws.length; k++) {
+        var w = allWithdraws[k];
+        if (w.status === 'pending' && sentIds.indexOf(w.id) === -1) {
+            var adminMsg = '💸 NEW WITHDRAWAL\n--------------------\n🆔 ID: ' + w.id + '\n👤 User: ' + (w.name||'') + ' (' + w.user + ')\n💵 Amount: ' + w.amount + ' BIG\n📉 Fee: ' + w.fee.toFixed(0) + ' BIG\n✅ Net: ' + w.net.toFixed(0) + ' BIG\n💼 Wallet: ' + w.wallet;
+            sendToAdmin(adminMsg);
+            sentIds.push(w.id);
+            localStorage.setItem(sentKey, JSON.stringify(sentIds));
+        }
+    }
+} catch(e) {}
   var total=allWithdraws.length,pend=allWithdraws.filter(function(x){return x.status==='pending'}).length,paid=allWithdraws.filter(function(x){return x.status==='paid'}).length,rej=allWithdraws.filter(function(x){return x.status==='rejected'}).length;
   setTxt('adminTotal',total);setTxt('adminPending',pend);setTxt('adminPaid',paid);setTxt('adminRejected',rej);
   var el=document.getElementById('adminList');if(!el)return;
