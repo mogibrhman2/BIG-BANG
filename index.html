@@ -188,18 +188,20 @@ function checkAdmin(){
 }
 function getLeague(l){
     l = parseInt(l) || 1;
-    if(l <= 10) return '🥉 Bronze';
-    if(l <= 25) return '🥈 Silver';
-    if(l <= 50) return '🥇 Gold';
-    if(l <= 100) return '💠 Platinum';
-    if(l <= 200) return '💚 Emerald';
-    if(l <= 350) return '💎 Diamond';
-    if(l <= 500) return '🏆 Master';
-    if(l <= 700) return '🌟 Grandmaster';
-    if(l <= 850) return '🔥 Legend';
-    if(l <= 950) return '⚡ Titan';
-    if(l <= 999) return '🌌 Cosmic';
-    return '👑 Godlike';
+    
+    if(l <= 10) return '🥉 Bronze';        // برنز (لول 1 تا 10)
+    if(l <= 25) return '🥈 Silver';        // نقره (لول 11 تا 25)
+    if(l <= 50) return '🥇 Gold';          // طلا (لول 26 تا 50)
+    if(l <= 100) return '💠 Platinum';     // پلاتینیوم (لول 51 تا 100)
+    if(l <= 200) return '💚 Emerald';      // زمرد (لول 101 تا 200)
+    if(l <= 350) return '💎 Diamond';      // الماس (لول 201 تا 350)
+    if(l <= 500) return '🏆 Master';       // استاد (لول 351 تا 500)
+    if(l <= 700) return '🌟 Grandmaster';  // گرند مستر (لول 501 تا 700)
+    if(l <= 850) return '🔥 Legend';       // اسطوره (لول 701 تا 850)
+    if(l <= 950) return '⚡ Titan';        // تایتان (لول 851 تا 950)
+    if(l <= 999) return '🌌 Cosmic';       // کیهانی (لول 951 تا 999)
+    
+    return '👑 Godlike';                   // خداگونه (لول 1000)
 }
 function getBoost(l){
     if(l <= 1) return '1.0';
@@ -209,6 +211,7 @@ function getBoost(l){
 function getPerDay(l){
     if(l <= 1) return 100; 
     
+    // استخراج روزانه تا لول 100 به 2800 می‌رسد
     if(l <= 100) {
         var base = 100;
         var target = 2800;
@@ -216,6 +219,7 @@ function getPerDay(l){
         return Math.round(total);
     }
     
+    // از لول 101 به بعد، رشد ملایم تا 25000 در لول 1000
     var base100 = 2800;
     var growthRate = 1.025; 
     var total = base100 * Math.pow(growthRate, (l - 100));
@@ -230,11 +234,13 @@ function levelCostBIG(l){
     if(l <= 1) return 0; 
     if(l >= 1000) return 80000000; 
     
+    // نقاط ثابت هزینه
     if(l === 2) return 1150;
     if(l === 3) return 2400;
-    if(l === 50) return 100000; 
-    if(l === 100) return 250000; 
+    if(l === 50) return 100000; // 10 دلار
+    if(l === 100) return 250000; // 25 دلار
     
+    // محاسبه خطی بین 3 تا 50
     if(l > 3 && l < 50) {
         var start = 2400;
         var end = 100000;
@@ -242,6 +248,7 @@ function levelCostBIG(l){
         return Math.round(start + ((l - 3) * step));
     }
     
+    // محاسبه خطی بین 50 تا 100
     if(l > 50 && l < 100) {
         var start2 = 100000;
         var end2 = 250000;
@@ -249,6 +256,7 @@ function levelCostBIG(l){
         return Math.round(start2 + ((l - 50) * step2));
     }
     
+    // محاسبه تصاعدی برای بالای 100
     if(l > 100) {
         var base100 = 250000;
         var growthRate = 1.06;
