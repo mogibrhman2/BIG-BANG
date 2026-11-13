@@ -207,41 +207,56 @@ function getBoost(l){
     return boost.toFixed(2);
 }
 function getPerDay(l){
-    if(l <= 1) return 30;
-    if(l === 2) return 55;
-    if(l === 3) return 78;
+    if(l <= 1) return 100; 
     
-    var base = 78;
-    var increase = 24.7; 
-    var total = base + ((l - 3) * increase);
+    if(l <= 100) {
+        var base = 100;
+        var target = 2800;
+        var total = base + ((target - base) * Math.pow((l - 1) / 99, 1.5));
+        return Math.round(total);
+    }
+    
+    var base100 = 2800;
+    var growthRate = 1.025; 
+    var total = base100 * Math.pow(growthRate, (l - 100));
     
     if(total > 25000) return 25000;
+    
     return Math.round(total);
-}
-function getHolding(){ 
-    try{ 
-        if(typeof wallet !== 'undefined' && wallet && isWalletConnected()) return realHoldBalance; 
-    }catch(e){} 
-    return 0; 
 }
 function getPool(){return bal}
 function getAssets(){return getPool()+getHolding()}
 function levelCostBIG(l){
-    if(l <= 0) return 0;
-    if(l === 1) return 500;
+    if(l <= 1) return 0; 
+    if(l >= 1000) return 80000000; 
+    
     if(l === 2) return 1150;
     if(l === 3) return 2400;
-    if(l >= 1000) return 80000000;
+    if(l === 50) return 100000; 
+    if(l === 100) return 250000; 
     
-    var base = 2400;
-    var factor = Math.pow(l / 3, 2.8); 
-    var total = base * factor;
-    
-    if (l >= 100) {
-        total = total * 1.5; 
+    if(l > 3 && l < 50) {
+        var start = 2400;
+        var end = 100000;
+        var step = (end - start) / (50 - 3);
+        return Math.round(start + ((l - 3) * step));
     }
     
-    return Math.round(total);
+    if(l > 50 && l < 100) {
+        var start2 = 100000;
+        var end2 = 250000;
+        var step2 = (end2 - start2) / (100 - 50);
+        return Math.round(start2 + ((l - 50) * step2));
+    }
+    
+    if(l > 100) {
+        var base100 = 250000;
+        var growthRate = 1.06;
+        var total = base100 * Math.pow(growthRate, (l - 100));
+        return Math.round(total);
+    }
+    
+    return 0;
 }
 function levelCostUSD(l){return levelCostBIG(l)*BIG_PRICE_USD;}
 function levelCostTON(l){if(l<=1||!REAL_RATE||REAL_RATE<=0)return 0;return levelCostBIG(l)/REAL_RATE;}
