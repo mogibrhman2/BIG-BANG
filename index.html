@@ -543,13 +543,27 @@ async function doWithdraw(w){
   if(amt>bal){showToast(T('lowBal'));return;}
   if(getHolding()<HOLD_REQUIRED){showToast(T('holdLow')+' '+Math.round(getHolding()));return;}
   if(getWdCooldownLeft()>0){showToast(T('wdWait')+' '+fmtCooldown(getWdCooldownLeft()));return;}
+  
   var fee=amt*FEE_PERCENT,net=amt-fee;bal-=amt;
-  // تولید شماره پیگیری ۶ رقمی یکتا
-var uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
-  var wd={id:uniqueId,amount:amt,fee:fee,net:net,wallet:wallet,user:myId,name:myName,date:new Date().toLocaleString('en-US'),status:'pending',tx:'',rejectReason:''};
-  allWithdraws.push(wd);await pushWdToCloud(wd);setTimeout(function(){ pushWdToCloud(wd); }, 3000);
+  var uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
+  var wd={id:uniqueId,amount:amt,fee:fee,net:net,wallet:wallet,user:myId,name:myName,date:new Date().toLocaleString('en-US'),status:'pending',tx:'',rejectReason:'',isRefunded:false};
+  
+  allWithdraws.push(wd);
+  
+  // ذخیره فوری در دیتابیس ابری (بدون تاخیر)
+  var cloudSaved = await pushWdToCloud(wd);
+  
   try{localStorage.setItem('big_last_wd',String(Date.now()))}catch(e){}
-  save();update(true);renderHistory();showToast(T('reqDone'));sendToAdmin('💸 NEW WD\n'+myId+'\n'+amt+' BIG\nWallet: '+wallet);
+  save();update(true);renderHistory();
+  
+  if(cloudSaved){
+      showToast(T('reqDone'));
+  } else {
+      showToast('⚠️ درخواست ثبت شد اما در ارسال به سرور تاخیر وجود دارد.');
+  }
+  
+  var adminMsg = '💸 NEW WITHDRAWAL\n--------------------\n🆔 ID: ' + uniqueId + '\n👤 User: ' + (myName||'') + ' (' + myId + ')\n💵 Amount: ' + amt + ' BIG\n📉 Fee: ' + fee.toFixed(0) + ' BIG\n✅ Net: ' + net.toFixed(0) + ' BIG\n💼 Wallet: ' + wallet;
+  sendToAdmin(adminMsg);
 }
 function renderHistory(){
   var h1=document.getElementById('history'); var h2=document.getElementById('history2');
@@ -788,7 +802,7 @@ setInterval(function(){if(wallet){ fetchRealHold(); syncLevelFromHold(); }},6000
 setInterval(async function(){
   var adminPage=document.getElementById('p-admin');
   if(adminPage && adminPage.className!=='hidden' && isAdmin()){ await renderAdmin(); }
-}, 5000);
+}, 2000);
 setInterval(async function(){
   if(pendingSwap && wallet){
     var nh = await fetchRealHold(); syncLevelFromHold();
