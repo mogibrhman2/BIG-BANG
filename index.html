@@ -557,7 +557,12 @@ function renderHistory(){
   var html='';
   if(!my.length){ html='<div class="hist-empty">'+T('noWd')+'</div>'; }
   else {
-    html = my.slice().reverse().map(function(x){
+    my.sort(function(a, b) {
+    var dateA = new Date(a.date).getTime() || 0;
+    var dateB = new Date(b.date).getTime() || 0;
+    return dateB - dateA;
+});
+html = my.slice().map(function(x){
       var track=x.id;
       var statusTxt='', statusCls='';
       if(x.status==='paid'){ statusTxt=T('statusPaid'); statusCls='wd-status-paid'; }
