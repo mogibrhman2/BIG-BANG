@@ -554,6 +554,18 @@ var uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
 function renderHistory(){
   var h1=document.getElementById('history'); var h2=document.getElementById('history2');
   var my=allWithdraws.filter(function(x){return x.user===myId});
+  // چک کردن درخواست‌های رد شده برای برگرداندن پول
+my.forEach(function(x){
+    if(x.status === 'rejected' && !x.isRefunded) {
+        bal += x.amount;
+        x.isRefunded = true;
+        save();
+        if (typeof cloudSaveOneWd === 'function') {
+            cloudSaveOneWd(x);
+        }
+        showToast('✅ مبلغ ' + x.amount + ' BIG به موجودی شما برگشت داده شد.'); 
+    }
+});
   var html='';
   if(!my.length){ html='<div class="hist-empty">'+T('noWd')+'</div>'; }
   else {
@@ -628,16 +640,36 @@ async function renderAdmin(){
 async function adminAction(idx,st){
   saveTxInputs();
   var inputVal=document.getElementById('tx-'+idx)?document.getElementById('tx-'+idx).value.trim():'';
+  
   if(st==='paid'){
     if(!inputVal){showToast(T('enterTx'));return}
-    allWithdraws[idx].status=st; allWithdraws[idx].tx=inputVal; allWithdraws[idx].rejectReason='';
+    allWithdraws[idx].status='paid'; 
+    allWithdraws[idx].tx=inputVal; 
+    allWithdraws[idx].rejectReason='';
+    allWithdraws[idx].isRefunded = false; // پول پرداخت شده، برگشتی نداریم
   } else {
     var reason=inputVal;
-    if(!reason) reason=prompt(T('reasonLabel'))||'';
-    if(!reason) return;
-    allWithdraws[idx].status='rejected'; allWithdraws[idx].rejectReason=reason; allWithdraws[idx].tx='';
+    if(!reason) reason='رد شده توسط ادمین'; 
+    
+    allWithdraws[idx].status='rejected'; 
+    allWithdraws[idx].rejectReason=reason; 
+    allWithdraws[idx].tx='';
+    allWithdraws[idx].isRefunded = false; // پول هنوز برنگشته!
+    
+    // برگرداندن فوری پول اگر خود ادمین در حال تست است
+    if (allWithdraws[idx].user === myId) {
+        bal += allWithdraws[idx].amount;
+        allWithdraws[idx].isRefunded = true;
+        save();
+        update(true);
+    }
   }
-  save(); await cloudSaveOneWd(allWithdraws[idx]); renderAdmin(); renderHistory(); showToast(st==='paid'?T('paidDone'):T('rejectedDone'));
+  
+  save(); 
+  await cloudSaveOneWd(allWithdraws[idx]); 
+  renderAdmin(); 
+  renderHistory(); 
+  showToast(st==='paid'?T('paidDone'):T('rejectedDone'));
 }
 async function refreshAdmin(){ await renderAdmin(); }
 function copyAllPending(){var p=allWithdraws.filter(function(x){return x.status==='pending'});if(!p.length){showToast(T('noPending'));return}var t=p.map(function(x){return x.user+' | '+x.amount+' BIG | '+x.wallet}).join('\n');try{navigator.clipboard.writeText(t)}catch(e){}showToast(T('copied'))}
@@ -766,6 +798,37 @@ setInterval(async function(){
     }
   }
 }, 60000);
+// تایمر خودکار برای برگرداندن پول درخواست‌های رد شده هر 10 ثانیه
+setInterval(async function(){
+    if (!myId) return;
+    try {
+        var cloudList = await cloudGetWds(); 
+        if (cloudList && cloudList.length > 0) {
+            var hasUpdate = false;
+            for (var i = 0; i < cloudList.length; i++) {
+                var cw = cloudList[i];
+                if (cw.user === myId && cw.status === 'rejected' && !cw.isRefunded) {
+                    bal += cw.amount;
+                    cw.isRefunded = true;
+                    hasUpdate = true;
+                    showToast('✅ مبلغ ' + cw.amount + ' BIG به موجودی شما برگشت داده شد.');
+                    
+                    for (var j = 0; j < allWithdraws.length; j++) {
+                        if (allWithdraws[j].id === cw.id) {
+                            allWithdraws[j].isRefunded = true;
+                        }
+                    }
+                    await cloudSaveOneWd(cw);
+                }
+            }
+            if (hasUpdate) {
+                save();
+                update(true);
+                renderHistory();
+            }
+        }
+    } catch(e) {}
+}, 10000);
 if(window.Telegram&&Telegram.WebApp){try{Telegram.WebApp.ready();Telegram.WebApp.expand();}catch(e){}}
 </script>
 </body>
