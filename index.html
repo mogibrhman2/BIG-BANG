@@ -585,14 +585,18 @@ async function renderAdmin(){
     for(var i=0;i<allWithdraws.length;i++) merged[allWithdraws[i].id]=allWithdraws[i];
     for(var j=0;j<cloudList.length;j++) merged[cloudList[j].id]=cloudList[j];
     allWithdraws=Object.keys(merged).map(function(k){return merged[k]});
-    allWithdraws.sort(function(a,b){return String(a.id).localeCompare(String(b.id))});
+    allWithdraws.sort(function(a, b) {
+    var dateA = new Date(a.date).getTime() || 0;
+    var dateB = new Date(b.date).getTime() || 0;
+    return dateB - dateA;
+});
     try{localStorage.setItem('big_all_withdraws',JSON.stringify(allWithdraws))}catch(e){}
   }
   var total=allWithdraws.length,pend=allWithdraws.filter(function(x){return x.status==='pending'}).length,paid=allWithdraws.filter(function(x){return x.status==='paid'}).length,rej=allWithdraws.filter(function(x){return x.status==='rejected'}).length;
   setTxt('adminTotal',total);setTxt('adminPending',pend);setTxt('adminPaid',paid);setTxt('adminRejected',rej);
   var el=document.getElementById('adminList');if(!el)return;
   if(!allWithdraws.length){el.innerHTML='<div class="hist-empty">'+T('noWdAdmin')+'</div>';return}
-  el.innerHTML=allWithdraws.slice().reverse().map(function(x){
+  el.innerHTML=allWithdraws.slice().map(function(x){
     var idx=allWithdraws.indexOf(x);
     var track=x.id;
     var statusTxt='', statusCls='';
