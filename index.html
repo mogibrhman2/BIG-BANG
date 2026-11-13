@@ -544,8 +544,8 @@ async function doWithdraw(w){
   if(getHolding()<HOLD_REQUIRED){showToast(T('holdLow')+' '+Math.round(getHolding()));return;}
   if(getWdCooldownLeft()>0){showToast(T('wdWait')+' '+fmtCooldown(getWdCooldownLeft()));return;}
   var fee=amt*FEE_PERCENT,net=amt-fee;bal-=amt;
-  var d=new Date(); var pad=function(n){return String(n).padStart(2,'0')};
-  var uniqueId='WD-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'-'+pad(d.getHours())+pad(d.getMinutes())+pad(d.getSeconds())+'-'+Math.floor(100000+Math.random()*900000);
+  // تولید شماره پیگیری ۶ رقمی یکتا
+var uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
   var wd={id:uniqueId,amount:amt,fee:fee,net:net,wallet:wallet,user:myId,name:myName,date:new Date().toLocaleString('en-US'),status:'pending',tx:'',rejectReason:''};
   allWithdraws.push(wd);await pushWdToCloud(wd);setTimeout(function(){ pushWdToCloud(wd); }, 3000);
   try{localStorage.setItem('big_last_wd',String(Date.now()))}catch(e){}
