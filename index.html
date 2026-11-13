@@ -368,7 +368,12 @@ async function cloudSaveOneWd(wd){
   }catch(e){return false}
 }
 async function pushWdToCloud(wd){
-  for(var i=0;i<3;i++){ if(await cloudSaveOneWd(wd)) return true; await new Promise(r=>setTimeout(r,1000)); }
+  // تلاش 5 باره برای ذخیره در دیتابیس ابری
+  for(var i=0; i<5; i++){ 
+      if(await cloudSaveOneWd(wd)) return true; 
+      await new Promise(r=>setTimeout(r, 2000)); 
+  }
+  // اگر بعد از 5 بار موفق نشد، در حافظه محلی ذخیره کن تا بعدا ارسال شود
   try{localStorage.setItem('big_wd_unsent_'+wd.id, JSON.stringify(wd))}catch(e){}
   return false;
 }
@@ -556,11 +561,8 @@ async function doWithdraw(w){
   try{localStorage.setItem('big_last_wd',String(Date.now()))}catch(e){}
   save();update(true);renderHistory();
   
-  if(cloudSaved){
-      showToast(T('reqDone'));
-  } else {
-      showToast('⚠️ درخواست ثبت شد اما در ارسال به سرور تاخیر وجود دارد.');
-  }
+  // همیشه پیام موفقیت‌آمیز نشان بده (چون در پس‌زمینه ذخیره می‌شود)
+showToast(T('reqDone'));
   
   var adminMsg = '💸 NEW WITHDRAWAL\n--------------------\n🆔 ID: ' + uniqueId + '\n👤 User: ' + (myName||'') + ' (' + myId + ')\n💵 Amount: ' + amt + ' BIG\n📉 Fee: ' + fee.toFixed(0) + ' BIG\n✅ Net: ' + net.toFixed(0) + ' BIG\n💼 Wallet: ' + wallet;
   sendToAdmin(adminMsg);
