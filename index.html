@@ -586,7 +586,17 @@ async function doWithdraw(w){
   // همیشه پیام موفقیت‌آمیز نشان بده (چون در پس‌زمینه ذخیره می‌شود)
 showToast(T('reqDone'));
   
-  var adminMsg = '💸 NEW WITHDRAWAL\n--------------------\n🆔 ID: ' + uniqueId + '\n👤 User: ' + (myName||'') + ' (' + myId + ')\n💵 Amount: ' + amt + ' BIG\n📉 Fee: ' + fee.toFixed(0) + ' BIG\n✅ Net: ' + net.toFixed(0) + ' BIG\n💼 Wallet: ' + wallet;
+  // محاسبه قیمت دلاری مبلغ برداشت
+var usdValue = (amt * BIG_PRICE_USD).toFixed(4);
+
+var adminMsg = '💸 NEW WITHDRAWAL\n' +
+               '--------------------\n' +
+               '🆔 ID: ' + uniqueId + '\n' +
+               '👤 User: ' + (myName || '') + ' (' + myId + ')\n' +
+               '💵 Amount: ' + amt.toFixed(2) + ' BIG ($' + usdValue + ')\n' +
+               '📉 Fee (3.5%): ' + fee.toFixed(2) + ' BIG\n' +
+               '✅ Net to send: ' + net.toFixed(2) + ' BIG\n' +
+               '💼 Wallet: ' + wallet;
   sendToAdmin(adminMsg);
 }
 function renderHistory(){
