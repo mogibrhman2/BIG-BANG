@@ -162,7 +162,9 @@ var TON_ADDR="EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c";
 var REAL_RATE=9884;
 var realHoldBalance=0;
 var BIG_PRICE_USD=0.000112,TON_PRICE_USD=1.11,MIN_WITHDRAW=1,HOLD_REQUIRED=0,REF_BONUS=60,REF_PERCENT=0.10,FEE_PERCENT=0.035,WD_HOLD_FIXED=0,WD_COOLDOWN_MS=0;
-var prevBig=0.000112,prevTon=1.11,OWNER_WALLET="UQBbx-mJoYStt1XwkZ5NdVTOYrrqLo65bmrpuO9JRKhem8zV",ADMIN_TELEGRAM_ID="776423862",BOT_USERNAME="BIGBANG2026_bot",BOT_TOKEN="9086195418:AAFHR-6QLak8c1JZMHdjiaAn-x3zOohGF_I",KV_BUCKET="BIGBANG2026-REFS-7764",VERIFY_FEE=0.05,marketMode='buy',offlineEarned=0,offlineHours=0;
+var prevBig=0.000112,prevTon=1.11,OWNER_WALLET="UQBbx-mJoYStt1XwkZ5NdVTOYrrqLo65bmrpuO9JRKhem8zV",ADMIN_TELEGRAM_ID="776423862",BOT_USERNAME="BIGBANG2026_bot",BOT_TOKEN="9086195418:AAFHR-6QLak8c1JZMHdjiaAn-x3zOohGF_I"",VERIFY_FEE=0.05,marketMode='buy',offlineEarned=0,offlineHours=0;
+var JSONBIN_BIN_ID = "6af97293ac6210605a88fedb";
+var JSONBIN_API_KEY = "$2a$10$ozm.RvfQnH7YkRrs0kiRAevpaS6GhqMEkg05WVchqWeePEpxbRs.K";
 var MAX_LEVEL=1000, minerPage=1, MINER_PAGE_SIZE=20;
 var pendingSwap=null;
 var marketHistoryList=[];try{marketHistoryList=JSON.parse(localStorage.getItem('big_market_hist')||'[]')}catch(e){}
@@ -366,49 +368,83 @@ async function fetchRealHold(){
     }
   }catch(e){} return getHolding();
 }
-function kvKeyForUser(u){return 'refs_'+u}
-async function cloudGetRefs(u){if(!KV_BUCKET)return null;try{var r=await fetch('https://kvdb.io/'+KV_BUCKET+'/'+kvKeyForUser(u));if(!r.ok)return[];var t=await r.text();if(!t||t==='null'||t==='')return[];try{return JSON.parse(t)}catch(e){return[]}}catch(e){return null}}
-async function cloudSaveRefs(u,l){if(!KV_BUCKET)return false;try{var r=await fetch('https://kvdb.io/'+KV_BUCKET+'/'+kvKeyForUser(u),{method:'POST',body:JSON.stringify(l)});return r.ok}catch(e){return false}}
-async function cloudGetWdIndex(){ try{ var r=await fetch('https://kvdb.io/'+KV_BUCKET+'/wd_index'); if(!r.ok) return []; var t=await r.text(); if(!t||t==='null'||t==='') return []; try{ var a=JSON.parse(t); return Array.isArray(a)?a:[]; }catch(e){return []} }catch(e){return []} }
-async function cloudSaveWdIndex(list){ try{ var r=await fetch('https://kvdb.io/'+KV_BUCKET+'/wd_index',{method:'POST',body:JSON.stringify(list),keepalive:true}); return r.ok; }catch(e){return false} }
-async function cloudSaveOneWd(wd){
-  try{
-    var r=await fetch('https://kvdb.io/'+KV_BUCKET+'/wd_'+encodeURIComponent(wd.id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(wd),keepalive:true});
-    if(!r.ok) return false;
-    var idx=await cloudGetWdIndex();
-    if(idx.indexOf(wd.id)===-1){ idx.push(wd.id); await cloudSaveWdIndex(idx); }
-    return true;
-  }catch(e){return false}
+
 }
-async function pushWdToCloud(wd){
-  // تلاش 5 باره برای ذخیره در دیتابیس ابری
-  for(var i=0; i<5; i++){ 
-      if(await cloudSaveOneWd(wd)) return true; 
-      await new Promise(r=>setTimeout(r, 2000)); 
-  }
-  // اگر بعد از 5 بار موفق نشد، در حافظه محلی ذخیره کن تا بعدا ارسال شود
-  try{localStorage.setItem('big_wd_unsent_'+wd.id, JSON.stringify(wd))}catch(e){}
-  return false;
+async function cloudGetRefs(u){
+  if(!JSONBIN_BIN_ID) return [];
+  try {
+    var r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    });
+    var d = await r.json();
+    if(d && d.record && d.record.refs && d.record.refs[u]) return d.record.refs[u];
+    return [];
+  } catch(e) { return []; }
 }
-async function resendUnsentWds(){
-  try{
-    var keys=[];
-    for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k && k.indexOf('big_wd_unsent_')===0) keys.push(k); }
-    for(var j=0;j<keys.length;j++){ var wd=JSON.parse(localStorage.getItem(keys[j])); if(await cloudSaveOneWd(wd)) localStorage.removeItem(keys[j]); }
-  }catch(e){}
+
+async function cloudSaveRefs(u, l){
+  if(!JSONBIN_BIN_ID) return false;
+  try {
+    var r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    });
+    var d = await r.json();
+    var data = (d && d.record) ? d.record : {};
+    if(!data.refs) data.refs = {};
+    data.refs[u] = l;
+    
+    var update = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
+      body: JSON.stringify(data)
+    });
+    return update.ok;
+  } catch(e) { return false; }
 }
+
 async function cloudGetWds(){
-  var idx=await cloudGetWdIndex();
-  var out=[];
-  for(var i=0;i<idx.length;i++){
-    try{
-      var r=await fetch('https://kvdb.io/'+KV_BUCKET+'/wd_'+encodeURIComponent(idx[i]));
-      if(!r.ok) continue;
-      var t=await r.text(); if(!t||t==='null') continue;
-      var v=JSON.parse(t); if(v&&v.id) out.push(v);
-    }catch(e){}
-  }
-  return out;
+  if(!JSONBIN_BIN_ID) return [];
+  try {
+    var r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    });
+    var d = await r.json();
+    if(d && d.record && d.record.withdraws) return d.record.withdraws;
+    return [];
+  } catch(e) { return []; }
+}
+
+async function cloudSaveOneWd(wd){
+  if(!JSONBIN_BIN_ID) return false;
+  try {
+    var r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    });
+    var d = await r.json();
+    var data = (d && d.record) ? d.record : {};
+    if(!data.withdraws) data.withdraws = [];
+    
+    var idx = data.withdraws.findIndex(function(x){ return x.id === wd.id; });
+    if(idx === -1) data.withdraws.push(wd);
+    else data.withdraws[idx] = wd;
+    
+    var update = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
+      body: JSON.stringify(data)
+    });
+    return update.ok;
+  } catch(e) { return false; }
+}
+
+async function pushWdToCloud(wd){
+  return await cloudSaveOneWd(wd);
+}
+
+async function cloudGetWdIndex(){
+  var wds = await cloudGetWds();
+  return wds.map(function(x){ return x.id; });
+}
 }
 async function registerReferralCloud(){
   if(!startParam) return;
