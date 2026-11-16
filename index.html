@@ -938,15 +938,10 @@ setInterval(async function(){
         }
     } catch(e) {}
 }, 10000);
-// 👇 تایمر بررسی خودکار وضعیت برای کاربران 👇
+// 👇 تایمر بررسی خودکار وضعیت (سریع در پس‌زمینه) 👇
 setInterval(async function(){
-  var histPage = document.getElementById('p-withdraw');
-  var profPage = document.getElementById('p-profile');
-  if ((histPage && histPage.className !== 'hidden') || (profPage && profPage.className !== 'hidden')) {
-      await renderHistory();
-  }
-}, 5000);
-// 👆 ---------------------------------------- 👆
+  await renderHistory();
+}, 2000);
 if(window.Telegram&&Telegram.WebApp){try{Telegram.WebApp.ready();Telegram.WebApp.expand();}catch(e){}}
 </script>
 </body>
