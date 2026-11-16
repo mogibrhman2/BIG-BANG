@@ -619,17 +619,25 @@ async function renderHistory(){
   var my=allWithdraws.filter(function(x){return x.user===myId});
   
   // چک کردن درخواست‌های رد شده برای برگرداندن پول
-  my.forEach(function(x){
-      if(x.status === 'rejected' && !x.isRefunded) {
-          bal += x.amount;
-          x.isRefunded = true;
-          save();
-          if (typeof cloudSaveOneWd === 'function') {
-              cloudSaveOneWd(x);
-          }
-          showToast('✅ مبلغ ' + x.amount + ' BIG به موجودی شما برگشت داده شد.'); 
-      }
-  });
+  // بررسی و برگرداندن پول درخواست‌های رد شده (به صورت امن و بدون تکرار)
+for (var i = 0; i < my.length; i++) {
+    var x = my[i];
+    if (x.status === 'rejected' && !x.isRefunded) {
+        // پول را برمی‌گردانیم
+        bal += x.amount;
+        x.isRefunded = true; // علامت می‌زنیم که پول برگشت خورده
+        save();
+        
+        // آپدیت فوری در سرور (JSONBin) تا دفعه بعدی دوباره پول اضافه نشود
+        if (typeof cloudSaveOneWd === 'function') {
+            cloudSaveOneWd(x).then(function() {
+                showToast('✅ مبلغ ' + x.amount + ' BIG به موجودی شما برگشت داده شد.');
+            });
+        } else {
+            showToast('✅ مبلغ ' + x.amount + ' BIG به موجودی شما برگشت داده شد.');
+        }
+    }
+}
 
   var html='';
   if(!my.length){ html='<div class="hist-empty">'+T('noWd')+'</div>'; }
@@ -907,37 +915,7 @@ setInterval(async function(){
     }
   }
 }, 60000);
-// تایمر خودکار برای برگرداندن پول درخواست‌های رد شده هر 10 ثانیه
-setInterval(async function(){
-    if (!myId) return;
-    try {
-        var cloudList = await cloudGetWds(); 
-        if (cloudList && cloudList.length > 0) {
-            var hasUpdate = false;
-            for (var i = 0; i < cloudList.length; i++) {
-                var cw = cloudList[i];
-                if (cw.user === myId && cw.status === 'rejected' && !cw.isRefunded) {
-                    bal += cw.amount;
-                    cw.isRefunded = true;
-                    hasUpdate = true;
-                    showToast('✅ مبلغ ' + cw.amount + ' BIG به موجودی شما برگشت داده شد.');
-                    
-                    for (var j = 0; j < allWithdraws.length; j++) {
-                        if (allWithdraws[j].id === cw.id) {
-                            allWithdraws[j].isRefunded = true;
-                        }
-                    }
-                    await cloudSaveOneWd(cw);
-                }
-            }
-            if (hasUpdate) {
-                save();
-                update(true);
-                renderHistory();
-            }
-        }
-    } catch(e) {}
-}, 10000);
+// تایمر قدیمی حذف شد تا از برگشت پول تکراری جلوگیری شود (کار برگشت پول الان در renderHistory انجام می‌شود).
 // 👇 تایمر بررسی خودکار وضعیت (سریع در پس‌زمینه) 👇
 setInterval(async function(){
   await renderHistory();
