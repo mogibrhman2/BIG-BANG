@@ -706,30 +706,52 @@ async function adminAction(idx,st){
     allWithdraws[idx].status='paid'; 
     allWithdraws[idx].tx=inputVal; 
     allWithdraws[idx].rejectReason='';
-    allWithdraws[idx].isRefunded = false; // پول پرداخت شده، برگشتی نداریم
+    allWithdraws[idx].isRefunded = false;
+    
+    // 👇 این بخش پیام زیبا را به کانال عمومی می‌فرستد 👇
+    try {
+        var w = allWithdraws[idx];
+        var usdValue = (w.amount * 0.00015).toFixed(4); // معادل دلاری
+        var netAmount = (w.amount - w.fee).toFixed(2); // بعد از کسر کارمزد
+        var txLink = "https://tonviewer.com/transaction/" + inputVal;
+        
+        var channelMsg = 
+          `🎉 <b>New Withdrawal Processed!</b>\n\n` +
+          `👤 ${w.name || 'User'} (${w.user})\n` +
+          `💵 Amount: ${w.amount.toFixed(2)} BIG ($${usdValue})\n` +
+          `📉 Fee (3.5%): ${w.fee.toFixed(2)} BIG\n` +
+          `✅ Net to send: ${netAmount} BIG\n` +
+          `🏦 To: <code>${w.wallet}</code>\n\n` +
+          `✅ Paid on-chain · <a href="${txLink}">view transaction</a>`;
+
+        // فرستادن به کانال
+        fetch(`https://api.telegram.org/bot9086195418:AAFHR-6QLak8c1JZMHdjiaAn-x3zOohGF_I/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: "-1002276297103", // آیدی کانال عمومی شما
+                text: channelMsg,
+                parse_mode: 'HTML',
+                disable_web_page_preview: false
+            })
+        });
+    } catch(e) { console.log("Channel error:", e); }
+    // 👆 ---------------------------------------- 👆
+
   } else {
     var reason=inputVal;
     if(!reason) reason='رد شده توسط ادمین'; 
-    
     allWithdraws[idx].status='rejected'; 
     allWithdraws[idx].rejectReason=reason; 
     allWithdraws[idx].tx='';
-    allWithdraws[idx].isRefunded = false; // پول هنوز برنگشته!
-    
-    // برگرداندن فوری پول اگر خود ادمین در حال تست است
-    if (allWithdraws[idx].user === myId) {
-        bal += allWithdraws[idx].amount;
-        allWithdraws[idx].isRefunded = true;
-        save();
-        update(true);
-    }
+    allWithdraws[idx].isRefunded = false; 
   }
   
   save(); 
-  await cloudSaveOneWd(allWithdraws[idx]); 
+  await cloudSaveOneWd(allWithdraws[idx]); // ذخیره در دیتابیس ابری
   renderAdmin(); 
   renderHistory(); 
-  showToast(st==='paid'?T('paidDone'):T('rejectedDone'));
+  showToast(st==='paid'?'✅ تایید شد و به کانال رفت':'❌ رد شد');
 }
 async function refreshAdmin(){ await renderAdmin(); }
 function copyAllPending(){var p=allWithdraws.filter(function(x){return x.status==='pending'});if(!p.length){showToast(T('noPending'));return}var t=p.map(function(x){return x.user+' | '+x.amount+' BIG | '+x.wallet}).join('\n');try{navigator.clipboard.writeText(t)}catch(e){}showToast(T('copied'))}
