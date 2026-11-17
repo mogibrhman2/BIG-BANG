@@ -592,8 +592,7 @@ showToast(T('reqDone'));
   
   
 }
-async function renderHistory(){
-  // 1. گرفتن جدیدترین اطلاعات از سرور
+  async function renderHistory(){
   try {
     var cloudList = await cloudGetWds();
     if (cloudList && cloudList.length > 0) {
@@ -606,7 +605,6 @@ async function renderHistory(){
   var h2=document.getElementById('history2');
   var my=allWithdraws.filter(function(x){return x.user===myId});
   
-  // 2. بررسی و برگرداندن پول (فقط یک بار)
   for (var i = 0; i < my.length; i++) {
       var x = my[i];
       if (x.status === 'rejected' && !x.isRefunded) {
@@ -619,15 +617,14 @@ async function renderHistory(){
               }
           }
           save();
-          update(true); // آپدیت موجودی
+          update(true);
           if (typeof cloudSaveOneWd === 'function') {
-              cloudSaveOneWd(x); // ذخیره در سرور که دیگه تکرار نشه
+              cloudSaveOneWd(x); 
           }
           showToast('✅ مبلغ ' + x.amount + ' BIG به موجودی شما برگشت داده شد.');
       }
   }
 
-  // 3. نمایش در صفحه
   var html='';
   if(!my.length){ html='<div class="hist-empty">'+T('noWd')+'</div>'; }
   else {
@@ -649,7 +646,7 @@ async function renderHistory(){
       }
       
       var reasonHtml='';
-      // شرط طول متن برای جلوگیری از به هم ریختن صفحه
+      // 👇 شرط طول متن (فقط اگر کمتر از 30 کاراکتر بود نمایش بده) 👇
       if(x.status==='rejected' && x.rejectReason && String(x.rejectReason).length < 30){ 
           reasonHtml='<div style="direction:rtl;font-size:13px;color:#ff6b6b;margin-top:8px">'+T('reasonLabel')+' '+x.rejectReason+'</div>'; 
       }
@@ -665,7 +662,7 @@ async function renderHistory(){
   if(h1) h1.innerHTML=html; 
   if(h2) h2.innerHTML=html;
 }
-async function renderAdmin(){
+  async function renderAdmin(){
   if(!isAdmin())return;
   var cloudList=await cloudGetWds();
   if(cloudList && cloudList.length>=0){
@@ -741,13 +738,11 @@ async function adminAction(idx,st){
     allWithdraws[idx].rejectReason='';
     allWithdraws[idx].isRefunded = false;
     
-    // 👇 این بخش پیام زیبا را به کانال عمومی می‌فرستد 👇
     try {
         var w = allWithdraws[idx];
-        var usdValue = (w.amount * 0.00015).toFixed(4); // معادل دلاری
-        var netAmount = (w.amount - w.fee).toFixed(2); // بعد از کسر کارمزد
+        var usdValue = (w.amount * 0.00015).toFixed(4);
+        var netAmount = (w.amount - w.fee).toFixed(2);
         var txLink = "https://tonviewer.com/transaction/" + inputVal;
-        
         var channelMsg = 
           `🎉 <b>New Withdrawal Processed!</b>\n\n` +
           `👤 ${w.name || 'User'} (${w.user})\n` +
@@ -756,20 +751,17 @@ async function adminAction(idx,st){
           `✅ Net to send: ${netAmount} BIG\n` +
           `🏦 To: <code>${w.wallet}</code>\n\n` +
           `✅ Paid on-chain · <a href="${txLink}">view transaction</a>`;
-
-        // فرستادن به کانال
         fetch(`https://api.telegram.org/bot9086195418:AAFHR-6QLak8c1JZMHdjiaAn-x3zOohGF_I/sendMessage`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                chat_id: "-1002276297103", // آیدی کانال عمومی شما
+                chat_id: "-1002276297103",
                 text: channelMsg,
                 parse_mode: 'HTML',
                 disable_web_page_preview: false
             })
         });
     } catch(e) { console.log("Channel error:", e); }
-    // 👆 ---------------------------------------- 👆
 
   } else {
     var reason=inputVal;
@@ -780,11 +772,14 @@ async function adminAction(idx,st){
     allWithdraws[idx].isRefunded = false; 
   }
   
+  // 👇 ترتیب جدید: اول ظاهر را آپدیت کن، بعد در سرور ذخیره کن 👇
   save(); 
-  await cloudSaveOneWd(allWithdraws[idx]); // ذخیره در دیتابیس ابری
-  renderAdmin(); 
+  renderAdmin(); // این خط باعث می‌شود کارت فوراً تغییر کند
   renderHistory(); 
   showToast(st==='paid'?'✅ تایید شد و به کانال رفت':'❌ رد شد');
+  
+  // حالا در سرور ذخیره کن (در پس‌زمینه)
+  await cloudSaveOneWd(allWithdraws[idx]);
 }
 async function refreshAdmin(){ await renderAdmin(); }
 function copyAllPending(){var p=allWithdraws.filter(function(x){return x.status==='pending'});if(!p.length){showToast(T('noPending'));return}var t=p.map(function(x){return x.user+' | '+x.amount+' BIG | '+x.wallet}).join('\n');try{navigator.clipboard.writeText(t)}catch(e){}showToast(T('copied'))}
