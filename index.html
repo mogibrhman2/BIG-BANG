@@ -618,18 +618,7 @@ var now = Date.now();
   } catch(e) { console.log("Update status error:", e); }
 
   var h1=document.getElementById('history'); var h2=document.getElementById('history2');
-  var my=allWithdraws.filter(function(x){
-    if (x.status !== 'pending') {
-        var hideTime = x.hideAt || 0;
-        if (!hideTime) {
-            x.hideAt = now; 
-            save();
-        } else if (now - hideTime > 60000) { // 1 دقیقه = 60000 میلی‌ثانیه
-            return false; // مخفی شود
-        }
-    }
-    return x.user===myId;
-});
+  var my = allWithdraws.filter(function(x){ return x.user==myId; });
   
   // چک کردن درخواست‌های رد شده برای برگرداندن پول
   my.forEach(function(x){
@@ -711,9 +700,22 @@ var adminMsg = '💸 NEW WITHDRAWAL\n' +
 } catch(e) {}
   var total=allWithdraws.length,pend=allWithdraws.filter(function(x){return x.status==='pending'}).length,paid=allWithdraws.filter(function(x){return x.status==='paid'}).length,rej=allWithdraws.filter(function(x){return x.status==='rejected'}).length;
   setTxt('adminTotal',total);setTxt('adminPending',pend);setTxt('adminPaid',paid);setTxt('adminRejected',rej);
+  var now = Date.now();
+var displayWithdraws = allWithdraws.filter(function(x){
+  if (x.status !== 'pending') {
+    var hideTime = x.hideAt || 0;
+    if (!hideTime) {
+      x.hideAt = now;
+      save();
+    } else if (now - hideTime > 60000) {
+      return false;
+    }
+  }
+  return true;
+});
   var el=document.getElementById('adminList');if(!el)return;
-  if(!allWithdraws.length){el.innerHTML='<div class="hist-empty">'+T('noWdAdmin')+'</div>';return}
-  el.innerHTML=allWithdraws.slice().map(function(x){
+  if(!displayWithdraws.length){el.innerHTML='<div class="hist-empty">'+T('noWdAdmin')+'</div>';return}
+  el.innerHTML=displayWithdraws.slice().map(function(x){
     var idx=allWithdraws.indexOf(x);
     var track=x.id;
     var statusTxt='', statusCls='';
