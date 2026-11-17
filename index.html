@@ -646,8 +646,8 @@ showToast(T('reqDone'));
       }
       
       var reasonHtml='';
-      // 👇 شرط طول متن (فقط اگر کمتر از 30 کاراکتر بود نمایش بده) 👇
-      if(x.status==='rejected' && x.rejectReason && String(x.rejectReason).length < 30){ 
+      // 👇 شرط طول متن (فقط اگر کمتر از 10 کاراکتر بود نمایش بده) 👇
+      if(x.status==='rejected' && x.rejectReason && String(x.rejectReason).length < 10){ 
           reasonHtml='<div style="direction:rtl;font-size:13px;color:#ff6b6b;margin-top:8px">'+T('reasonLabel')+' '+x.rejectReason+'</div>'; 
       }
       
