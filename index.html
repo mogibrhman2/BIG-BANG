@@ -593,7 +593,7 @@ showToast(T('reqDone'));
   
 }
 async function renderHistory(){
-  // 👇 ۱. گرفتن جدیدترین اطلاعات از دیتابیس ابری (JSONBin) 👇
+  // 1. گرفتن جدیدترین اطلاعات از سرور
   try {
     var cloudList = await cloudGetWds();
     if (cloudList && cloudList.length > 0) {
@@ -606,33 +606,28 @@ async function renderHistory(){
   var h2=document.getElementById('history2');
   var my=allWithdraws.filter(function(x){return x.user===myId});
   
-  // 👇 ۲. بررسی و برگرداندن پول درخواست‌های رد شده 👇
-  var refundedAny = false;
+  // 2. بررسی و برگرداندن پول (فقط یک بار)
   for (var i = 0; i < my.length; i++) {
       var x = my[i];
       if (x.status === 'rejected' && !x.isRefunded) {
           bal += x.amount; 
           x.isRefunded = true; 
-          
           for(var k=0; k<allWithdraws.length; k++){
               if(String(allWithdraws[k].id) === String(x.id)){
                   allWithdraws[k].isRefunded = true;
                   break;
               }
           }
-          
           save();
-          refundedAny = true;
-          
+          update(true); // آپدیت موجودی
           if (typeof cloudSaveOneWd === 'function') {
-              cloudSaveOneWd(x); // ذخیره در سرور
+              cloudSaveOneWd(x); // ذخیره در سرور که دیگه تکرار نشه
           }
           showToast('✅ مبلغ ' + x.amount + ' BIG به موجودی شما برگشت داده شد.');
       }
   }
-  if(refundedAny){ update(true); }
 
-  // 👇 ۳. نمایش در صفحه (با اصلاح مشکل متن طولانی) 👇
+  // 3. نمایش در صفحه
   var html='';
   if(!my.length){ html='<div class="hist-empty">'+T('noWd')+'</div>'; }
   else {
@@ -654,7 +649,7 @@ async function renderHistory(){
       }
       
       var reasonHtml='';
-      // 👇 شرط جدید: فقط اگر متن دلیل رد کوتاه بود نمایش داده شود (برای جلوگیری از به هم ریختن صفحه) 👇
+      // شرط طول متن برای جلوگیری از به هم ریختن صفحه
       if(x.status==='rejected' && x.rejectReason && String(x.rejectReason).length < 30){ 
           reasonHtml='<div style="direction:rtl;font-size:13px;color:#ff6b6b;margin-top:8px">'+T('reasonLabel')+' '+x.rejectReason+'</div>'; 
       }
@@ -918,37 +913,11 @@ setInterval(async function(){
     }
   }
 }, 60000);
-// تایمر خودکار برای برگرداندن پول درخواست‌های رد شده هر 10 ثانیه
+// 👇 تایمر بررسی خودکار وضعیت (سریع در پس‌زمینه) 👇
 setInterval(async function(){
-    if (!myId) return;
-    try {
-        var cloudList = await cloudGetWds(); 
-        if (cloudList && cloudList.length > 0) {
-            var hasUpdate = false;
-            for (var i = 0; i < cloudList.length; i++) {
-                var cw = cloudList[i];
-                if (cw.user === myId && cw.status === 'rejected' && !cw.isRefunded) {
-                    bal += cw.amount;
-                    cw.isRefunded = true;
-                    hasUpdate = true;
-                    showToast('✅ مبلغ ' + cw.amount + ' BIG به موجودی شما برگشت داده شد.');
-                    
-                    for (var j = 0; j < allWithdraws.length; j++) {
-                        if (allWithdraws[j].id === cw.id) {
-                            allWithdraws[j].isRefunded = true;
-                        }
-                    }
-                    await cloudSaveOneWd(cw);
-                }
-            }
-            if (hasUpdate) {
-                save();
-                update(true);
-                renderHistory();
-            }
-        }
-    } catch(e) {}
-}, 10000);
+  await renderHistory();
+}, 2000);
+// تایمر قدیمی حذف شد
 if(window.Telegram&&Telegram.WebApp){try{Telegram.WebApp.ready();Telegram.WebApp.expand();}catch(e){}}
 </script>
 </body>
