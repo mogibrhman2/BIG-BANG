@@ -663,11 +663,16 @@ var now = Date.now();
 }
 async function renderAdmin(){
   if(!isAdmin())return;
- var cloudList = await cloudGetWds();
-if (cloudList && cloudList.length > 0) {
-  allWithdraws = cloudList; // جایگزینی کامل لیست با لیست سرور
-  save();
-} 
+ try {
+  var cloudList = await cloudGetWds();
+  if (cloudList && cloudList.length > 0) {
+    var merged = {};
+    for(var i=0; i<allWithdraws.length; i++) merged[allWithdraws[i].id] = allWithdraws[i];
+    for(var j=0; j<cloudList.length; j++) merged[cloudList[j].id] = cloudList[j];
+    allWithdraws = Object.keys(merged).map(function(k){return merged[k]});
+    save();
+  }
+} catch(e) { console.log("Admin fetch error:", e); }
   // ارسال پیام درخواست‌های جدید به تلگرام ادمین
 try {
     var sentKey = 'big_sent_ids';
