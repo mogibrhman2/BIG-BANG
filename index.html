@@ -593,7 +593,9 @@ showToast(T('reqDone'));
   
 }
 async function renderHistory(){
-  // 👇 چک کردن وضعیت از دیتابیس ابری قبل از نمایش 👇
+ // 👇 چک کردن وضعیت از دیتابیس ابری قبل از نمایش 👇
+  var hiddenIds = JSON.parse(localStorage.getItem('big_hidden_wds') || '[]');
+var now = Date.now();
   try {
     var cloudList = await cloudGetWds(); // گرفتن لیست جدید از JSONBin
     if (cloudList && cloudList.length > 0) {
@@ -616,7 +618,18 @@ async function renderHistory(){
   } catch(e) { console.log("Update status error:", e); }
 
   var h1=document.getElementById('history'); var h2=document.getElementById('history2');
-  var my=allWithdraws.filter(function(x){return x.user===myId});
+  var my=allWithdraws.filter(function(x){
+    if (x.status !== 'pending') {
+        var hideTime = x.hideAt || 0;
+        if (!hideTime) {
+            x.hideAt = now; 
+            save();
+        } else if (now - hideTime > 60000) { // 1 دقیقه = 60000 میلی‌ثانیه
+            return false; // مخفی شود
+        }
+    }
+    return x.user===myId;
+});
   
   // چک کردن درخواست‌های رد شده برای برگرداندن پول
   my.forEach(function(x){
