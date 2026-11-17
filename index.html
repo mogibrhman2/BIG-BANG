@@ -650,7 +650,7 @@ var now = Date.now();
       var txHtml='';
       if(x.status==='paid' && x.tx){ txHtml='<div style="direction:rtl;font-size:13px;color:#c8e8ff;margin-top:8px">'+T('txLabel')+'</div>'+'<div class="wd-hist-tx"><a href="https://tonscan.org/tx/'+x.tx+'" target="_blank">'+x.tx+'</a></div>'; }
       var reasonHtml='';
-      if(x.status==='rejected' && x.rejectReason){ reasonHtml='<div style="direction:rtl;font-size:13px;color:#ff6b6b;margin-top:8px">'+T('reasonLabel')+' '+String(x.rejectReason).slice(0,30)+'</div>'; }
+      if(x.status==='rejected' && x.rejectReason){ reasonHtml='<div style="direction:rtl;font-size:13px;color:#ff6b6b;margin-top:8px">'+T('reasonLabel')+' '+x.rejectReason+'</div>'; }
       return '<div class="wd-hist-item">'
         +'<div class="wd-hist-row"><span>'+T('trackLabel')+'</span><b dir="ltr">'+track+'</b></div>'
         +'<div class="wd-hist-row"><span>'+T('amountLabel')+'</span><b dir="ltr">'+x.amount+' BIG</b></div>'
@@ -726,7 +726,7 @@ var displayWithdraws = allWithdraws.filter(function(x){
     var txInput = isPending ? '<div style="direction:rtl;font-size:13px;color:#c8e8ff;margin-top:10px">'+T('txLabel')+' / '+T('reasonLabel')+'</div><div class="tx-wrap"><input id="tx-'+idx+'" placeholder="'+T('txPlaceholder')+'" value="'+(x.tx||'')+'"><button class="paste-btn" onclick="pasteTx('+idx+')">'+T('pasteBtn')+'</button></div>' : '';
     var btns = isPending ? '<div class="admin-btns"><button class="admin-ok" onclick="adminAction('+idx+',\'paid\')">'+T('approveBtn')+'</button><button class="admin-no" onclick="adminAction('+idx+',\'rejected\')">'+T('rejectBtn')+'</button></div>' : '';
     var showTx = (x.status==='paid' && x.tx) ? '<div class="wd-hist-tx"><a href="https://tonscan.org/tx/'+x.tx+'" target="_blank">'+x.tx+'</a></div>' : '';
-    var showReason = (x.status==='rejected' && x.rejectReason) ? '<div style="direction:rtl;font-size:13px;color:#ff6b6b;margin-top:8px">'+T('reasonLabel')+' '+...+ String(x.rejectReason).slice(0,30) +...+'</div>' : '';
+    var showReason = (x.status==='rejected' && x.rejectReason) ? '<div style="direction:rtl;font-size:13px;color:#ff6b6b;margin-top:8px">'+T('reasonLabel')+' '+...+x.rejectReason+...+'</div>' : '';
     return '<div class="admin-item">'
       +'<div class="admin-row"><span>'+T('trackLabel')+'</span><b dir="ltr">'+track+'</b></div>'
       +'<div class="admin-row"><span>'+T('amountLabel')+'</span><b dir="ltr">'+x.amount+' BIG</b></div>'
