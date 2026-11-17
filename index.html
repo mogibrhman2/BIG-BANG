@@ -935,9 +935,20 @@ setInterval(async function(){
                 update(true);
                 renderHistory();
             }
-        }
-    } catch(e) {}
-}, 10000);
+    }
+  } catch(e) {}
+}, 10000); 
+  // 👇 تایمر جدید شما که اینجا اضافه شد 👇
+setInterval(async function(){
+  var histPage = document.getElementById('p-withdraw');
+  var profPage = document.getElementById('p-profile');
+  if ((histPage && histPage.className !== 'hidden') || (profPage && profPage.className !== 'hidden')) {
+      await renderHistory();
+  }
+}, 5000);
+// 👆 ---------------------------------------- 👆
+
+if(window.Telegram&&Telegram.WebApp){try{Telegram.WebApp.ready();Telegram.WebApp.expand();}catch(e){}} // <--- خط 941
 if(window.Telegram&&Telegram.WebApp){try{Telegram.WebApp.ready();Telegram.WebApp.expand();}catch(e){}}
 </script>
 </body>
