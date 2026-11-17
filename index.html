@@ -905,7 +905,7 @@ setInterval(async function(){
     }
   }
 }, 60000);
-// تایمر خودکار برای برگرداندن پول درخواست‌های رد شده هر 10 ثانیه
+// تایمر خودکار برای برگرداندن پول درخواست‌های رد شده هر 3 ثانیه
 setInterval(async function(){
     if (!myId) return;
     try {
@@ -935,7 +935,7 @@ setInterval(async function(){
             }
         }
     } catch(e) {}
-}, 10000);
+}, 3000);
 if(window.Telegram&&Telegram.WebApp){try{Telegram.WebApp.ready();Telegram.WebApp.expand();}catch(e){}}
 </script>
 </body>
