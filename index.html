@@ -592,30 +592,54 @@ showToast(T('reqDone'));
   
   
 }
-function renderHistory(){
+async function renderHistory(){
+  // 👇 چک کردن وضعیت از دیتابیس ابری قبل از نمایش 👇
+  try {
+    var cloudList = await cloudGetWds(); // گرفتن لیست جدید از JSONBin
+    if (cloudList && cloudList.length > 0) {
+      var hasUpdate = false;
+      for (var i = 0; i < allWithdraws.length; i++) {
+        for (var j = 0; j < cloudList.length; j++) {
+          // اگر آیدی درخواست یکی بود و وضعیتش در ابر فرق داشت
+          if (String(allWithdraws[i].id) === String(cloudList[j].id)) {
+            if (allWithdraws[i].status !== cloudList[j].status || allWithdraws[i].isRefunded !== cloudList[j].isRefunded) {
+              allWithdraws[i] = cloudList[j]; // آپدیت با نسخه جدید ابری
+              hasUpdate = true;
+            }
+          }
+        }
+      }
+      if (hasUpdate) {
+        save(); // ذخیره در حافظه گوشی
+      }
+    }
+  } catch(e) { console.log("Update status error:", e); }
+
   var h1=document.getElementById('history'); var h2=document.getElementById('history2');
   var my=allWithdraws.filter(function(x){return x.user===myId});
+  
   // چک کردن درخواست‌های رد شده برای برگرداندن پول
-my.forEach(function(x){
-    if(x.status === 'rejected' && !x.isRefunded) {
-        bal += x.amount;
-        x.isRefunded = true;
-        save();
-        if (typeof cloudSaveOneWd === 'function') {
-            cloudSaveOneWd(x);
-        }
-        showToast('✅ مبلغ ' + x.amount + ' BIG به موجودی شما برگشت داده شد.'); 
-    }
-});
+  my.forEach(function(x){
+      if(x.status === 'rejected' && !x.isRefunded) {
+          bal += x.amount;
+          x.isRefunded = true;
+          save();
+          if (typeof cloudSaveOneWd === 'function') {
+              cloudSaveOneWd(x);
+          }
+          showToast('✅ مبلغ ' + x.amount + ' BIG به موجودی شما برگشت داده شد.'); 
+      }
+  });
+
   var html='';
   if(!my.length){ html='<div class="hist-empty">'+T('noWd')+'</div>'; }
   else {
     my.sort(function(a, b) {
-    var dateA = new Date(a.date).getTime() || 0;
-    var dateB = new Date(b.date).getTime() || 0;
-    return dateB - dateA;
-});
-html = my.slice().map(function(x){
+      var dateA = new Date(a.date).getTime() || 0;
+      var dateB = new Date(b.date).getTime() || 0;
+      return dateB - dateA;
+    });
+    html = my.slice().map(function(x){
       var track=x.id;
       var statusTxt='', statusCls='';
       if(x.status==='paid'){ statusTxt=T('statusPaid'); statusCls='wd-status-paid'; }
