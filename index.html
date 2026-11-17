@@ -592,39 +592,73 @@ showToast(T('reqDone'));
   
   
 }
-function renderHistory(){
-  var h1=document.getElementById('history'); var h2=document.getElementById('history2');
-  var my=allWithdraws.filter(function(x){return x.user===myId});
-  // چک کردن درخواست‌های رد شده برای برگرداندن پول
-my.forEach(function(x){
-    if(x.status === 'rejected' && !x.isRefunded) {
-        bal += x.amount;
-        x.isRefunded = true;
-        save();
-        if (typeof cloudSaveOneWd === 'function') {
-            cloudSaveOneWd(x);
-        }
-        showToast('✅ مبلغ ' + x.amount + ' BIG به موجودی شما برگشت داده شد.'); 
+async function renderHistory(){
+  // 👇 ۱. گرفتن جدیدترین اطلاعات از دیتابیس ابری (JSONBin) 👇
+  try {
+    var cloudList = await cloudGetWds();
+    if (cloudList && cloudList.length > 0) {
+      allWithdraws = cloudList; 
+      save(); 
     }
-});
+  } catch(e) { console.log("Update error:", e); }
+
+  var h1=document.getElementById('history'); 
+  var h2=document.getElementById('history2');
+  var my=allWithdraws.filter(function(x){return x.user===myId});
+  
+  // 👇 ۲. بررسی و برگرداندن پول درخواست‌های رد شده 👇
+  var refundedAny = false;
+  for (var i = 0; i < my.length; i++) {
+      var x = my[i];
+      if (x.status === 'rejected' && !x.isRefunded) {
+          bal += x.amount; 
+          x.isRefunded = true; 
+          
+          for(var k=0; k<allWithdraws.length; k++){
+              if(String(allWithdraws[k].id) === String(x.id)){
+                  allWithdraws[k].isRefunded = true;
+                  break;
+              }
+          }
+          
+          save();
+          refundedAny = true;
+          
+          if (typeof cloudSaveOneWd === 'function') {
+              cloudSaveOneWd(x); // ذخیره در سرور
+          }
+          showToast('✅ مبلغ ' + x.amount + ' BIG به موجودی شما برگشت داده شد.');
+      }
+  }
+  if(refundedAny){ update(true); }
+
+  // 👇 ۳. نمایش در صفحه (با اصلاح مشکل متن طولانی) 👇
   var html='';
   if(!my.length){ html='<div class="hist-empty">'+T('noWd')+'</div>'; }
   else {
     my.sort(function(a, b) {
-    var dateA = new Date(a.date).getTime() || 0;
-    var dateB = new Date(b.date).getTime() || 0;
-    return dateB - dateA;
-});
-html = my.slice().map(function(x){
+      var dateA = new Date(a.date).getTime() || 0;
+      var dateB = new Date(b.date).getTime() || 0;
+      return dateB - dateA;
+    });
+    html = my.slice().map(function(x){
       var track=x.id;
       var statusTxt='', statusCls='';
       if(x.status==='paid'){ statusTxt=T('statusPaid'); statusCls='wd-status-paid'; }
       else if(x.status==='rejected'){ statusTxt=T('statusRejected'); statusCls='wd-status-rejected'; }
       else { statusTxt=T('statusPending'); statusCls='wd-status-pending'; }
+      
       var txHtml='';
-      if(x.status==='paid' && x.tx){ txHtml='<div style="direction:rtl;font-size:13px;color:#c8e8ff;margin-top:8px">'+T('txLabel')+'</div>'+'<div class="wd-hist-tx"><a href="https://tonscan.org/tx/'+x.tx+'" target="_blank">'+x.tx+'</a></div>'; }
+      if(x.status==='paid' && x.tx){ 
+          txHtml='<div style="direction:rtl;font-size:13px;color:#c8e8ff;margin-top:8px">'+T('txLabel')+'</div>'+'<div class="wd-hist-tx"><a href="https://tonscan.org/tx/'+x.tx+'" target="_blank">'+x.tx+'</a></div>'; 
+      }
+      
       var reasonHtml='';
-      if(x.status==='rejected' && x.rejectReason){ reasonHtml='<div style="direction:rtl;font-size:13px;color:#ff6b6b;margin-top:8px">'+T('reasonLabel')+' '+x.rejectReason+'</div>'; }
+      // 👇 شرط جدید: فقط اگر متن دلیل رد کوتاه بود نمایش داده شود (برای جلوگیری از به هم ریختن صفحه) 👇
+      if(x.status==='rejected' && x.rejectReason && String(x.rejectReason).length < 30){ 
+          reasonHtml='<div style="direction:rtl;font-size:13px;color:#ff6b6b;margin-top:8px">'+T('reasonLabel')+' '+x.rejectReason+'</div>'; 
+      }
+      
       return '<div class="wd-hist-item">'
         +'<div class="wd-hist-row"><span>'+T('trackLabel')+'</span><b dir="ltr">'+track+'</b></div>'
         +'<div class="wd-hist-row"><span>'+T('amountLabel')+'</span><b dir="ltr">'+x.amount+' BIG</b></div>'
@@ -633,7 +667,8 @@ html = my.slice().map(function(x){
         + txHtml + reasonHtml +'</div>';
     }).join('');
   }
-  if(h1) h1.innerHTML=html; if(h2) h2.innerHTML=html;
+  if(h1) h1.innerHTML=html; 
+  if(h2) h2.innerHTML=html;
 }
 async function renderAdmin(){
   if(!isAdmin())return;
