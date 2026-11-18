@@ -415,11 +415,6 @@ async function pushWdToCloud(wd) { return await cloudSaveOneWd(wd); }
 async function resendUnsentWds(){ return true; }
 // --- پایان توابع دیتابیس ابری ---
 
-async function cloudGetWdIndex(){ return []; }
-async function cloudSaveWdIndex(list){ return true; }
-async function pushWdToCloud(wd) { return await cloudSaveOneWd(wd); }
-async function resendUnsentWds(){ return true; } // غیرفعال کردن ارسال‌های قدیمی
-// --- پایان توابع دیتابیس ابری ---
 async function registerReferralCloud(){
   if(!startParam) return;
   var refId = String(startParam).replace('startapp=','').replace('start=','').replace('ref_','').replace('ref','').trim();
