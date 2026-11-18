@@ -662,68 +662,78 @@ var now = Date.now();
   if(h1) h1.innerHTML=html; if(h2) h2.innerHTML=html;
 }
 async function renderAdmin(){
-  if(!isAdmin())return;
- try {
-  var cloudList = await cloudGetWds();
-  if (cloudList && cloudList.length > 0) {
-    var merged = {};
-    for(var i=0; i<allWithdraws.length; i++) merged[allWithdraws[i].id] = allWithdraws[i];
-    for(var j=0; j<cloudList.length; j++) merged[cloudList[j].id] = cloudList[j];
-    allWithdraws = Object.keys(merged).map(function(k){return merged[k]});
-    save();
-  }
-} catch(e) { console.log("Admin fetch error:", e); }
-  // ارسال پیام درخواست‌های جدید به تلگرام ادمین
-try {
-    var sentKey = 'big_sent_ids';
-    var sentIds = JSON.parse(localStorage.getItem(sentKey) || '[]');
-    for (var k = 0; k < allWithdraws.length; k++) {
-        var w = allWithdraws[k];
-        if (w.status === 'pending' && sentIds.indexOf(w.id) === -1) {
-           var usdValue = (w.amount * BIG_PRICE_USD).toFixed(4);
-var adminMsg = '💸 NEW WITHDRAWAL\n' +
-               '--------------------\n' +
-               '🆔 ID: ' + w.id + '\n' +
-               '👤 User: ' + (w.name || '') + ' (' + w.user + ')\n' +
-               '💵 Amount: ' + w.amount.toFixed(2) + ' BIG ($' + usdValue + ')\n' +
-               '📉 Fee (3.5%): ' + w.fee.toFixed(2) + ' BIG\n' +
-               '✅ Net to send: ' + w.net.toFixed(2) + ' BIG\n' +
-               '💼 Wallet: ' + w.wallet; 
-            sendToAdmin(adminMsg);
-            sentIds.push(w.id);
-            localStorage.setItem(sentKey, JSON.stringify(sentIds));
-        }
-    }
-} catch(e) {}
-  var total=allWithdraws.length,pend=allWithdraws.filter(function(x){return x.status==='pending'}).length,paid=allWithdraws.filter(function(x){return x.status==='paid'}).length,rej=allWithdraws.filter(function(x){return x.status==='rejected'}).length;
-  setTxt('adminTotal',total);setTxt('adminPending',pend);setTxt('adminPaid',paid);setTxt('adminRejected',rej);
-  var now = Date.now();
-var displayWithdraws = allWithdraws.filter(function(x){
-  if (x.status !== 'pending') {
-    var hideTime = x.hideAt || 0;
-    if (!hideTime) {
-      x.hideAt = now;
+  if(!isAdmin()) return;
+  
+  // 1. گرفتن لیست ابری از JSONBin
+  try {
+    var cloudList = await cloudGetWds();
+    if (cloudList && cloudList.length > 0) {
+      var merged = {};
+      // اول لیست لوکال رو می‌ریزیم تو
+      for(var i=0; i<allWithdraws.length; i++) {
+          merged[allWithdraws[i].id] = allWithdraws[i];
+      }
+      // بعد لیست ابری رو روش می‌ریزیم (ابر اولویت داره)
+      for(var j=0; j<cloudList.length; j++) {
+          merged[cloudList[j].id] = cloudList[j];
+      }
+      allWithdraws = Object.keys(merged).map(function(k){ return merged[k]; });
       save();
-    } else if (now - hideTime > 60000) {
-      return false;
     }
+  } catch(e) { console.log("Admin fetch error:", e); }
+
+  // 2. محاسبه آمار
+  var total=allWithdraws.length;
+  var pend=allWithdraws.filter(function(x){return x.status==='pending'}).length;
+  var paid=allWithdraws.filter(function(x){return x.status==='paid'}).length;
+  var rej=allWithdraws.filter(function(x){return x.status==='rejected'}).length;
+  
+  setTxt('adminTotal',total);
+  setTxt('adminPending',pend);
+  setTxt('adminPaid',paid);
+  setTxt('adminRejected',rej);
+
+  // 3. نمایش لیست در پنل ادمین
+  var el=document.getElementById('adminList');
+  if(!el) return;
+  
+  // فقط درخواست‌های در انتظار و پرداخت شده‌های اخیر رو نشون بده
+  var displayWithdraws = allWithdraws.filter(function(x){
+      if(x.status === 'pending') return true; // همه در انتظارها رو نشون بده
+      // درخواست‌های تایید شده فقط 2 دقیقه (120000 میلی‌ثانیه) در پنل بمونن
+      if(x.status === 'paid' || x.status === 'rejected'){
+          var hideTime = x.hideAt || 0;
+          if (!hideTime) {
+              x.hideAt = Date.now();
+              save();
+          } else if (Date.now() - hideTime > 120000) {
+              return false;
+          }
+          return true;
+      }
+      return false;
+  });
+
+  if(!displayWithdraws.length){
+      el.innerHTML='<div class="hist-empty">'+T('noWdAdmin')+'</div>';
+      return;
   }
-  return true;
-});
-  var el=document.getElementById('adminList');if(!el)return;
-  if(!displayWithdraws.length){el.innerHTML='<div class="hist-empty">'+T('noWdAdmin')+'</div>';return}
-  el.innerHTML=displayWithdraws.slice().map(function(x){
-    var idx=allWithdraws.indexOf(x);
-    var track=x.id;
+
+  // مرتب‌سازی از جدید به قدیم
+  displayWithdraws.sort(function(a,b){ return b.id - a.id; });
+
+  el.innerHTML = displayWithdraws.map(function(x){
+    var idx = allWithdraws.findIndex(function(item) { return String(item.id) === String(x.id); });
+    var track = x.id;
     var statusTxt='', statusCls='';
-    if(x.status==='paid'){statusTxt=T('statusPaid');statusCls='wd-status-paid';}
-    else if(x.status==='rejected'){statusTxt=T('statusRejected');statusCls='wd-status-rejected';}
-    else {statusTxt=T('statusPending');statusCls='wd-status-pending';}
+    if(x.status==='paid'){ statusTxt=T('statusPaid'); statusCls='wd-status-paid'; }
+    else if(x.status==='rejected'){ statusTxt=T('statusRejected'); statusCls='wd-status-rejected'; }
+    else { statusTxt=T('statusPending'); statusCls='wd-status-pending'; }
+    
     var isPending = x.status==='pending';
     var txInput = isPending ? '<div style="direction:rtl;font-size:13px;color:#c8e8ff;margin-top:10px">'+T('txLabel')+' / '+T('reasonLabel')+'</div><div class="tx-wrap"><input id="tx-'+idx+'" placeholder="'+T('txPlaceholder')+'" value="'+(x.tx||'')+'"><button class="paste-btn" onclick="pasteTx('+idx+')">'+T('pasteBtn')+'</button></div>' : '';
     var btns = isPending ? '<div class="admin-btns"><button class="admin-ok" onclick="adminAction('+idx+',\'paid\')">'+T('approveBtn')+'</button><button class="admin-no" onclick="adminAction('+idx+',\'rejected\')">'+T('rejectBtn')+'</button></div>' : '';
-    var showTx = (x.status==='paid' && x.tx) ? '<div class="wd-hist-tx"><a href="https://tonscan.org/tx/'+x.tx+'" target="_blank">'+x.tx+'</a></div>' : '';
-    var showReason = (x.status==='rejected' && x.rejectReason) ? '<div style="direction:rtl;font-size:13px;color:#ff6b6b;margin-top:8px">'+T('reasonLabel')+' '+String(x.rejectReason).slice(0,30)+'</div>' : '';
+    
     return '<div class="admin-item">'
       +'<div class="admin-row"><span>'+T('trackLabel')+'</span><b dir="ltr">'+track+'</b></div>'
       +'<div class="admin-row"><span>'+T('amountLabel')+'</span><b dir="ltr">'+x.amount+' BIG</b></div>'
@@ -732,8 +742,9 @@ var displayWithdraws = allWithdraws.filter(function(x){
       +'<div class="admin-row"><span>'+T('dateLabel')+'</span><b dir="ltr">'+x.date+'</b></div>'
       +'<div style="direction:rtl;font-size:13px;color:#ffcc00;margin-top:10px">'+T('walletLabel')+'</div>'
       +'<div class="admin-wallet" onclick="navigator.clipboard.writeText(\''+x.wallet+'\');showToast(\''+T('copied')+'\')">'+x.wallet+'</div>'
-      + showTx + showReason + txInput + btns +'</div>';
+      + txInput + btns +'</div>';
   }).join('');
+  
   restoreTxInputs();
 }
 async function adminAction(idx,st){
@@ -953,7 +964,7 @@ setInterval(async function(){
   // 👇 تایمر بررسی خودکار وضعیت (سریع در پس‌زمینه) 👇
 setInterval(async function(){
   await renderHistory();
-}, 2000);
+}, 1000);
 if(window.Telegram&&Telegram.WebApp){try{Telegram.WebApp.ready();Telegram.WebApp.expand();}catch(e){}} // <--- خط 941
 if(window.Telegram&&Telegram.WebApp){try{Telegram.WebApp.ready();Telegram.WebApp.expand();}catch(e){}}
 </script>
