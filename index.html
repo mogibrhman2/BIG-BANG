@@ -372,45 +372,45 @@ function kvKeyForUser(u){return 'refs_'+u}
 async function cloudGetRefs(u){if(!KV_BUCKET)return null;try{var r=await fetch('https://kvdb.io/'+KV_BUCKET+'/'+kvKeyForUser(u));if(!r.ok)return[];var t=await r.text();if(!t||t==='null'||t==='')return[];try{return JSON.parse(t)}catch(e){return[]}}catch(e){return null}}
 async function cloudSaveRefs(u,l){if(!KV_BUCKET)return false;try{var r=await fetch('https://kvdb.io/'+KV_BUCKET+'/'+kvKeyForUser(u),{method:'POST',body:JSON.stringify(l)});return r.ok}catch(e){return false}}
 
-// --- شروع توابع دیتابیس ابری (JSONBin) برای برداشت‌ها ---
 async function cloudGetWds() {
   try {
-    var r = await fetch('https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID + '/latest', {
-      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    var r = await fetch(API_URL + '/api/withdraws');
+    return await r.json();
+  } catch(e) { return []; }
+}
+
+async function pushWdToCloud(wd) {
+  try {
+    var r = await fetch(API_URL + '/api/withdraw', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(wd)
     });
     var d = await r.json();
-    if (d && d.record && d.record.withdraws) {
-      return d.record.withdraws;
-    }
-    return [];
-  } catch(e) { return []; }
+    return d.success;
+  } catch(e) { return false; }
 }
 
 async function cloudSaveOneWd(wd) {
   try {
-    var r = await fetch('https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID + '/latest', {
-      headers: { 'X-Master-Key': JSONBIN_API_KEY }
+    var r = await fetch(API_URL + '/api/update-withdraw', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+          id: wd.id, 
+          status: wd.status, 
+          tx: wd.tx, 
+          rejectReason: wd.rejectReason 
+      })
     });
     var d = await r.json();
-    var data = (d && d.record) ? d.record : {};
-    if (!data.withdraws) data.withdraws = [];
-    
-    var idx = data.withdraws.findIndex(function(x){ return String(x.id) === String(wd.id); });
-    if (idx === -1) data.withdraws.push(wd);
-    else data.withdraws[idx] = wd;
-    
-    var update = await fetch('https://api.jsonbin.io/v3/b/' + JSONBIN_BIN_ID, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN_API_KEY },
-      body: JSON.stringify(data)
-    });
-    return update.ok;
+    return d.success;
   } catch(e) { return false; }
 }
 
+// توابع قدیمی (برای جلوگیری از ارور)
 async function cloudGetWdIndex(){ return []; }
 async function cloudSaveWdIndex(list){ return true; }
-async function pushWdToCloud(wd) { return await cloudSaveOneWd(wd); }
 async function resendUnsentWds(){ return true; }
 // --- پایان توابع دیتابیس ابری ---
 
