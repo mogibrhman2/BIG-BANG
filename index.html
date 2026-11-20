@@ -372,10 +372,15 @@ function kvKeyForUser(u){return 'refs_'+u}
 async function cloudGetRefs(u){if(!KV_BUCKET)return null;try{var r=await fetch('https://kvdb.io/'+KV_BUCKET+'/'+kvKeyForUser(u));if(!r.ok)return[];var t=await r.text();if(!t||t==='null'||t==='')return[];try{return JSON.parse(t)}catch(e){return[]}}catch(e){return null}}
 async function cloudSaveRefs(u,l){if(!KV_BUCKET)return false;try{var r=await fetch('https://kvdb.io/'+KV_BUCKET+'/'+kvKeyForUser(u),{method:'POST',body:JSON.stringify(l)});return r.ok}catch(e){return false}}
 
+// --- شروع کدهای اصلاح‌شده برای اتصال به سرور VPS ---
+
 async function cloudGetWds() {
   try {
     var r = await fetch(API_URL + '/api/withdraws');
-    return await r.json();
+    if(!r.ok) return [];
+    var text = await r.text();
+    if(!text || text === 'null' || text === '') return [];
+    return JSON.parse(text);
   } catch(e) { return []; }
 }
 
@@ -386,8 +391,9 @@ async function pushWdToCloud(wd) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(wd)
     });
+    if(!r.ok) return false;
     var d = await r.json();
-    return d.success;
+    return d.success === true;
   } catch(e) { return false; }
 }
 
@@ -400,13 +406,17 @@ async function cloudSaveOneWd(wd) {
           id: wd.id, 
           status: wd.status, 
           tx: wd.tx, 
-          rejectReason: wd.rejectReason 
+          rejectReason: wd.rejectReason,
+          isRefunded: wd.isRefunded
       })
     });
+    if(!r.ok) return false;
     var d = await r.json();
-    return d.success;
+    return d.success === true;
   } catch(e) { return false; }
 }
+
+// --- پایان کدهای اصلاح‌شده ---
 
 // توابع قدیمی (برای جلوگیری از ارور)
 async function cloudGetWdIndex(){ return []; }
@@ -570,27 +580,53 @@ async function doWithdraw(w){
   if(!checkCaptcha(w))return;
   if(!isWalletVerified()){showToast(T('wdLocked'));return;}
   var inp=document.getElementById('wAmount'+(w==='1'?'':'2'));var amt=parseFloat(inp?inp.value:'')||0;
+  
   if(amt<MIN_WITHDRAW){showToast(T('minWd'));return;}
   if(amt>bal){showToast(T('lowBal'));return;}
   if(getHolding()<HOLD_REQUIRED){showToast(T('holdLow')+' '+Math.round(getHolding()));return;}
   if(getWdCooldownLeft()>0){showToast(T('wdWait')+' '+fmtCooldown(getWdCooldownLeft()));return;}
   
-  var fee=amt*FEE_PERCENT,net=amt-fee;bal-=amt;
+  var fee=amt*FEE_PERCENT, net=amt-fee;
   var uniqueId = Math.floor(100000 + Math.random() * 900000).toString();
-  var wd={id:uniqueId,amount:amt,fee:fee,net:net,wallet:wallet,user:myId,name:myName,date:new Date().toLocaleString('en-US'),status:'pending',tx:'',rejectReason:'',isRefunded:false};
+  var wd = {
+      id: uniqueId, 
+      amount: amt, 
+      fee: fee, 
+      net: net, 
+      wallet: wallet, 
+      user: myId, 
+      name: myName, 
+      date: new Date().toLocaleString('en-US'), 
+      status: 'pending', 
+      tx: '', 
+      rejectReason: '', 
+      isRefunded: false
+  };
   
+  // ۱. کم کردن موجودی کاربر
+  bal -= amt;
+  save(); 
+  update(true);
+  
+  // ۲. ذخیره در حافظه گوشی
   allWithdraws.push(wd);
   
-  // ذخیره فوری در دیتابیس ابری (بدون تاخیر)
-  var cloudSaved = await pushWdToCloud(wd);
+  // ۳. ارسال به سرور VPS
+  var success = await pushWdToCloud(wd);
   
-  try{localStorage.setItem('big_last_wd',String(Date.now()))}catch(e){}
-  save();update(true);renderHistory();
+  if(success) {
+      showToast(T('reqDone')); // پیام موفقیت
+      // ارسال پیام به تلگرام ادمین
+      sendToAdmin('🔔 درخواست برداشت جدید!\n👤 ' + myName + '\n💵 ' + amt + ' BIG\n🏦 ' + wallet);
+  } else {
+      // اگر سرور جواب نداد، پول را برمی‌گردانیم
+      bal += amt;
+      save();
+      update(true);
+      showToast('❌ خطا در ارتباط با سرور. لطفاً دوباره تلاش کنید.');
+  }
   
-  // همیشه پیام موفقیت‌آمیز نشان بده (چون در پس‌زمینه ذخیره می‌شود)
-showToast(T('reqDone'));
-  
-  
+  renderHistory();
 }
 async function renderHistory(){
  // 👇 چک کردن وضعیت از دیتابیس ابری قبل از نمایش 👇
@@ -664,24 +700,15 @@ var now = Date.now();
 async function renderAdmin(){
   if(!isAdmin()) return;
   
-  // 1. گرفتن لیست جدید از دیتابیس ابری
-  try {
-    var cloudList = await cloudGetWds();
-    if (cloudList && cloudList.length > 0) {
-      var merged = {};
-      // لیست گوشی خودمون
-      for(var i=0; i<allWithdraws.length; i++) {
-          merged[allWithdraws[i].id] = allWithdraws[i];
-      }
-      // لیست کاربران (ابر)
-      for(var j=0; j<cloudList.length; j++) {
-          merged[cloudList[j].id] = cloudList[j]; 
-      }
-      allWithdraws = Object.keys(merged).map(function(k){ return merged[k]; });
-      save(); // ذخیره در گوشی ادمین
-    }
-  } catch(e) { console.log("Admin fetch error:", e); }
-
+  // دریافت لیست جدید از سرور VPS
+try {
+  var cloudList = await cloudGetWds();
+  if (cloudList && cloudList.length > 0) {
+    allWithdraws = cloudList; // جایگزینی کل لیست با لیست سرور
+    save(); // ذخیره در گوشی ادمین
+  }
+} catch(e) { console.log("Admin fetch error:", e); }
+  
   // 2. محاسبه آمار
   var total=allWithdraws.length;
   var pend=allWithdraws.filter(function(x){return x.status==='pending'}).length;
