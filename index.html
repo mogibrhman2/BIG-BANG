@@ -36,13 +36,85 @@ body{
 .live-price{font-size:20px;font-weight:900;background:linear-gradient(135deg,#0a2a4a,#02120a);padding:14px 16px;border-radius:16px;margin-top:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid #00c2ff66;box-shadow:0 4px 18px rgba(0,0,0,.35);position:relative;z-index:1}
 .live-price b{color:#fff;font-size:22px}.live-dot{display:inline-block;width:10px;height:10px;background:#22ff88;border-radius:50%;animation:blink 1s infinite}@keyframes blink{50%{opacity:.3}}
 .hold-box{background:#1a0a00;border:2px solid #ffaa00;border-radius:12px;padding:12px;margin-top:10px}.hold-box b{color:#ffaa00}
-.ref-row{display:flex;justify-content:space-between;align-items:center;background:#02120a;border:1px solid #00c2ff;border-radius:12px;padding:10px;margin-top:8px}
-.admin-card{background:#1a0a00;border:2px solid #ffaa00;border-radius:14px;padding:14px;margin-top:12px}.admin-card b{color:#ffaa00}.admin-card input{width:100%;padding:14px;border-radius:10px;border:2px solid #ffaa00;background:#02120a;color:#fff;margin-top:8px}.tx-wrap{display:flex;gap:8px;margin-top:8px}.tx-wrap input{margin-top:0;flex:1}.paste-btn{background:#ffaa00;color:#000;border:none;padding:0 16px;border-radius:10px;font-weight:900}.small-btn{padding:10px 14px;border-radius:8px;border:none;font-weight:900;font-size:13px;margin-right:6px;margin-top:10px}.ok{background:#22ff88;color:#022c16}.no{background:#ff4444;color:#fff}
-.txid-box{background:#02120a;border:1px dashed #00c2ff;border-radius:10px;padding:10px;margin-top:10px;font-size:13px;word-break:break-all}.txid-box a{color:#00e5ff;font-weight:900}
-.ref-clean{background:linear-gradient(135deg,#062a4a,#062a1e);border:2px solid #00c2ff;border-radius:16px;padding:16px;text-align:center}.ref-clean h2{color:#22ff88;font-size:24px}.ref-link{font-size:15px;font-weight:900;word-break:break-all;overflow-wrap:anywhere;line-height:1.6;margin-top:10px;background:#02120a;padding:12px;border-radius:10px;direction:ltr;text-align:center}
-#ton-connect{margin:0 15px}.top-row #ton-connect{margin:0;width:100%}.atf-wrap{margin:12px 15px}.atf-title{text-align:center;font-size:22px;font-weight:900;background:linear-gradient(90deg,#00c2ff,#22ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:14px 0 10px}.atf-card{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#062a4a,#062a1e);border:2px solid #00c2ff;border-radius:18px;padding:14px;margin-top:10px}.atf-icon{width:52px;height:52px;min-width:52px;border-radius:50%;background:#02120a;border:2px solid #00c2ff;display:flex;align-items:center;justify-content:center;font-size:26px}.atf-card b{color:#fff;font-size:17px}.atf-card small{color:#c8e8ff;font-size:13px;display:block;margin-top:2px}.atf-pill{background:#02120a;border:1px solid #22ff88;color:#22ff88;padding:6px 12px;border-radius:20px;font-weight:900;font-size:14px;white-space:nowrap}.atf-green{color:#22ff88;font-weight:900;font-size:16px;white-space:nowrap}
-.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#062a4a;border:2px solid #00c2ff;color:#fff;padding:14px 20px;border-radius:14px;font-weight:900;z-index:9999;display:none;text-align:center;max-width:90%}
-.wd-card{background:linear-gradient(135deg,#062a4a,#062a1e);border:2px solid #00c2ff;border-radius:16px;padding:16px;margin:12px 15px}.wd-card b{color:#ffcc00}.wd-card input{width:100%;padding:13px;border-radius:10px;border:1px solid #00c2ff;background:#02120a;color:#fff;margin-top:10px}.wd-btn{width:100%;background:linear-gradient(90deg,#00aaff,#22ff88);color:#02120a;border:3px solid #b3f0ff;border-radius:14px;padding:15px;font-size:18px;font-weight:900;margin-top:12px}.wd-btn:disabled{opacity:.4}
+/* --- استایل‌های جدید بخش رفرال --- */
+.ref-header-img {
+  width: 100%; height: 150px; border-radius: 16px; margin-top: 10px;
+  background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.8)), url('https://files.catbox.moe/jsy34w.jpg') center/cover;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border: 1px solid #00c2ff44;
+}
+.ref-header-img h2 { font-size: 22px; color: #fff; margin-bottom: 5px; text-shadow: 0 2px 4px #000; }
+.ref-header-img p { font-size: 13px; color: #b3d4ff; }
+.ref-percent-box {
+  background: #0a1e18; border: 1px solid #22ff8844; border-radius: 16px;
+  padding: 20px; margin-top: 15px; text-align: center;
+}
+.ref-percent-box .big-percent {
+  font-size: 45px; font-weight: 900; color: #22ff88;
+  text-shadow: 0 0 15px rgba(34, 255, 136, 0.4); margin-bottom: 10px;
+}
+.ref-percent-box p { font-size: 13px; color: #c8e8ff; line-height: 1.6; }
+.ref-stats-grid { display: flex; gap: 10px; margin-top: 15px; }
+.ref-stat-box {
+  flex: 1; background: #0a1e18; border: 1px solid #22ff8833; border-radius: 16px;
+  padding: 15px 5px; text-align: center;
+}
+.ref-stat-box small { font-size: 12px; color: #8ad8ff; display: block; margin-bottom: 5px; }
+.ref-stat-box b { font-size: 20px; color: #22ff88; display: block; }
+.ref-stat-box b span { font-size: 12px; color: #fff; display: block; margin-top: 3px; font-weight: normal; }
+.ref-history-btn {
+  width: 100%; background: #0a1e18; border: 1px solid #22ff8844; border-radius: 16px;
+  padding: 15px; margin-top: 15px; color: #fff; font-size: 15px; font-weight: 900;
+  display: flex; justify-content: center; align-items: center; gap: 10px;
+}
+.ref-link-box {
+  background: #0a1e18; border: 1px solid #22ff8844; border-radius: 16px;
+  padding: 20px; margin-top: 15px; text-align: center;
+}
+.ref-link-box h3 { font-size: 16px; color: #fff; margin-bottom: 15px; }
+.ref-link-input {
+  background: #02120a; border: 1px solid #22ff8866; border-radius: 10px;
+  padding: 12px; font-size: 14px; color: #fff; direction: ltr; text-align: center;
+  width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ref-btns-row { display: flex; gap: 10px; margin-top: 15px; }
+.ref-btn-copy {
+  flex: 1; background: #02120a; border: 1px solid #22ff8866; border-radius: 12px;
+  padding: 15px; color: #fff; font-size: 15px; font-weight: 900;
+  display: flex; justify-content: center; align-items: center; gap: 8px;
+}
+.ref-btn-share {
+  flex: 1; background: linear-gradient(90deg, #1fd6a0, #22ff88); border: none; border-radius: 12px;
+  padding: 15px; color: #02120a; font-size: 15px; font-weight: 900;
+  display: flex; justify-content: center; align-items: center; gap: 8px;
+}
+.ref-note { font-size: 12px; color: #c8e8ff; text-align: center; margin-top: 12px; }
+.ref-team-list {
+  background: #0a1e18; border: 1px solid #22ff8844; border-radius: 16px;
+  padding: 20px; margin-top: 15px;
+}
+.ref-team-list h3 { font-size: 18px; color: #fff; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+.ref-team-info {
+  background: #02120a; border: 1px solid #22ff8833; border-radius: 10px;
+  padding: 12px; font-size: 13px; color: #c8e8ff; line-height: 1.6; margin-bottom: 15px;
+}
+.ref-user-row {
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid #22ff8822; padding: 12px 0;
+}
+.ref-user-row:last-child { border-bottom: none; }
+.ref-user-info { display: flex; align-items: center; gap: 12px; }
+.ref-user-avatar {
+  width: 40px; height: 40px; border-radius: 50%; background: #1fd6a0;
+  display: flex; justify-content: center; align-items: center;
+  font-size: 18px; font-weight: 900; color: #fff;
+}
+.ref-user-details b { font-size: 15px; color: #fff; display: block; }
+.ref-user-details small { font-size: 12px; color: #8ad8ff; }
+.ref-user-status {
+  background: #0a2a1a; color: #22ff88; border: 1px solid #22ff8866;
+  padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 900;
+}
 .wallet-note{margin:0 15px;background:#fff3cd;color:#000;border-radius:12px;padding:10px;font-size:13px;font-weight:900;text-align:center;display:none}.ref-banner{background:#02120a;border:2px dashed #00c2ff;border-radius:12px;padding:10px;margin:10px 15px;text-align:center;font-size:13px;font-weight:900;color:#8affb8;display:none}.admin-denied{background:#1a0a00;border:2px solid #ff4444;border-radius:16px;padding:30px;margin:20px 15px;text-align:center}.admin-denied b{color:#ff4444;font-size:20px}
 .wallet-auto{background:#02120a;border:2px solid #00c2ff;border-radius:12px;padding:12px;margin-top:10px;font-size:13px;word-break:break-all}.wallet-auto b{color:#22ff88}.wallet-auto .addr{color:#fff;font-weight:900;direction:ltr;text-align:left}.wallet-auto.disconnected{border-color:#ff4444}.wallet-auto.disconnected b{color:#ff4444}
 .captcha-box{background:#02120a;border:2px dashed #00c2ff;border-radius:12px;padding:12px;margin-top:12px;display:flex;gap:8px;align-items:center}.captcha-q{background:linear-gradient(90deg,#00aaff,#22ff88);color:#02120a;font-weight:900;font-size:20px;padding:10px 14px;border-radius:10px;white-space:nowrap;direction:ltr}.captcha-box input{margin-top:0;flex:1;text-align:center;font-size:18px;font-weight:900}.captcha-refresh{background:#062a4a;color:#00e5ff;border:2px solid #00c2ff;border-radius:10px;padding:10px 12px;font-size:18px;font-weight:900}
@@ -125,10 +197,57 @@ body{
 </div>
 
 <div id="p-referral" class="hidden">
-<div class="card"><b data-t="invite"></b><div class="ref-clean" style="margin-top:10px"><h2>💥 BIG BANG Mini App</h2><div class="ref-link" id="refLinkShow">...</div><p style="font-size:12px;color:#8affb8;margin-top:8px" data-t="inviteNote"></p></div><button class="btn" onclick="copyRef()" data-t="copyRef"></button><button class="btn btn2" onclick="shareRef()" data-t="shareRef"></button></div>
-<div class="ref-claim-card"><h3 data-t="refInviteTitle"></h3><p><b>60</b> <span data-t="refInviteTxt"></span></p><p style="font-size:13px"><span data-t="refInvited"></span>: <b id="inviteCountTxt">0</b> • CLAIM: <b id="inviteClaimableTxt">0</b> BIG</p><button class="ref-claim-btn" id="claimInviteBtn" onclick="claimInviteBonus()" data-t="claimInviteBtn"></button></div>
-<div class="ref-claim-card" style="border-color:#00c2ff"><h3 data-t="ref10Title"></h3><p><span data-t="ref10Txt"></span> <b>10%</b></p><p style="font-size:13px"><span data-t="ref10TotalLabel"></span>: <b id="ref10TotalTxt">0</b> BIG • CLAIM: <b id="ref10ClaimableTxt">0</b> BIG</p><button class="ref-claim-btn" id="claimRef10Btn" onclick="claimRef10()" data-t="claimRef10Btn"></button></div>
-<div class="card"><b data-t="refStats"></b><p style="line-height:2"><span data-t="refCountLabel"></span>: <b id="refCount" style="color:#fff">0</b><br><span data-t="refQualLabel"></span>: <b id="refQualified" style="color:#22ff88">0</b><br><span data-t="refEarnLabel"></span>: <b id="refEarn" style="color:#22ff88">0</b> BIG</p><div id="refList"></div><button class="btn btn2" onclick="refreshRefs()" style="width:100%;margin:10px 0 0" data-t="refreshRefs"></button></div>
+  <div style="padding: 15px;">
+    <div class="ref-header-img">
+      <h2>دعوت و کسب درآمد</h2>
+      <p>تیم خودت را بساز و با هم رشد کنید</p>
+    </div>
+
+    <div class="ref-percent-box">
+      <div class="big-percent">10%</div>
+      <p>از ماینینگ زیرمجموعه‌های فعال <b>+ 100 توکن</b> پاداش به ازای هر زیرمجموعه</p>
+    </div>
+
+    <div class="ref-stats-grid">
+      <div class="ref-stat-box">
+        <small>💰 درآمد کل</small>
+        <b><span id="totalEarnTxt">0</span></b>
+        <span>BIG</span>
+      </div>
+      <div class="ref-stat-box">
+        <small>⚡ فعال</small>
+        <b id="activeCountTxt">0</b>
+      </div>
+      <div class="ref-stat-box">
+        <small>👥 دعوت شده</small>
+        <b id="totalRefCountTxt">0</b>
+      </div>
+    </div>
+
+    <button class="ref-history-btn">
+      🕒 تاریخچه پاداش و پورسانت
+    </button>
+
+    <div class="ref-link-box">
+      <h3>لینک دعوت شما</h3>
+      <div class="ref-link-input" id="refLinkShow">...</div>
+      <div class="ref-btns-row">
+        <button class="ref-btn-copy" onclick="copyRef()">📋 کپی لینک</button>
+        <button class="ref-btn-share" onclick="shareRef()">📩 دعوت دوستان</button>
+      </div>
+      <p class="ref-note">زیرمجموعه فعال حداقل ۲۰۰ توکن در موجودی داشته باشد.</p>
+    </div>
+
+    <div class="ref-team-list">
+      <h3>👥 تیم شما (زیرمجموعه‌ها) <span id="teamCountTxt" style="float:left;color:#22ff88;">0</span></h3>
+      <div class="ref-team-info">
+        ⓘ پورسانت ۱۰٪ ماین و پاداش ۱۰۰ توکنی هر دعوت به صورت خودکار به موجودی شما اضافه می‌شود.
+      </div>
+      <div id="refList">
+        <!-- لیست کاربران اینجا لود می‌شود -->
+      </div>
+    </div>
+  </div>
 </div>
 
 <div id="p-withdraw" class="hidden">
@@ -889,7 +1008,35 @@ function update(refresh){
   var mi2=document.getElementById('myNumericId2');if(mi2)mi2.innerText=myNumericId;
   var pu=document.getElementById('profileUserId');if(pu)pu.innerText=myNumericId;
   var rl=document.getElementById('refLinkShow');if(rl)rl.innerText=getRefLink();
-  var rlist=document.getElementById('refList');if(rlist){if(!refList.length)rlist.innerHTML='';else rlist.innerHTML=refList.map(function(r){return '<div class="ref-row"><div><b>'+(r.name||'Friend')+'</b><br><small>ID '+r.id+'</small></div><div style="text-align:left"><b style="color:#22ff88">'+Math.round(r.earned||0)+' BIG</b><br><small>'+T('holdLabel')+' '+Math.round(r.hold||0)+'</small></div></div>'}).join('')}
+  var rlist = document.getElementById('refList');
+if (rlist) {
+  if (!refList.length) {
+    rlist.innerHTML = '<div style="text-align:center;color:#8ad8ff;padding:20px 0;">هنوز کسی را دعوت نکرده‌اید</div>';
+  } else {
+    rlist.innerHTML = refList.map(function(r){
+      var initial = (r.name || 'U').charAt(0).toUpperCase();
+      var isActive = (r.hold >= 100 || r.earned > 0); 
+      var statusHtml = isActive 
+        ? '<div class="ref-user-status">فعال</div>' 
+        : '<div class="ref-user-status" style="background:#2a1a00;color:#ffaa00;border-color:#ffaa0066;">غیرفعال</div>';
+      
+      return '<div class="ref-user-row">' +
+          '<div class="ref-user-info">' +
+            '<div class="ref-user-avatar">' + initial + '</div>' +
+            '<div class="ref-user-details">' +
+              '<b>' + (r.name || 'Friend') + '</b>' +
+              '<small>سطح 1</small>' +
+            '</div>' +
+          '</div>' +
+          statusHtml +
+        '</div>';
+    }).join('');
+  }
+}
+setTxt('totalEarnTxt', Math.round(refEarn));
+setTxt('activeCountTxt', refList.filter(function(r){ return r.hold >= 100 || r.earned > 0; }).length);
+setTxt('totalRefCountTxt', refList.length);
+setTxt('teamCountTxt', refList.length);
   var claimBtn=document.getElementById('claimBtn');if(claimBtn)claimBtn.disabled=pendingMined<=0.0001;
   updateWdUI();renderHistory();
   if(refresh)save();
