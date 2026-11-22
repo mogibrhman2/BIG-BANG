@@ -771,7 +771,7 @@ async function adminAction(idx,st){
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                chat_id: "-1002276297103", // آیدی کانال عمومی شما
+                chat_id: "-1003821235100", // آیدی کانال عمومی شما
                 text: channelMsg,
                 parse_mode: 'HTML',
                 disable_web_page_preview: false
@@ -922,7 +922,7 @@ setInterval(async function(){
     }
   }
 }, 60000);
-// تایمر خودکار برای برگرداندن پول درخواست‌های رد شده هر 10 ثانیه
+// تایمر خودکار برای برگرداندن پول درخواست‌های رد شده هر ۳ ثانیه
 setInterval(async function(){
     if (!myId) return;
     try {
@@ -952,7 +952,7 @@ setInterval(async function(){
             }
     }
   } catch(e) {}
-}, 10000); 
+}, 3000); 
   // 👇 تایمر بررسی خودکار وضعیت (سریع در پس‌زمینه) 👇
 setInterval(async function(){
   await renderHistory();
